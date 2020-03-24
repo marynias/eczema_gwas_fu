@@ -1,0 +1,28 @@
+library(peer)
+library(tools)
+args = commandArgs(trailingOnly=TRUE)
+
+expr = read.delim(args[1], header=FALSE)
+covs = read.delim(args[2],header=FALSE)
+
+model = PEER()
+PEER_setCovariates(model, as.matrix(covs))
+PEER_setPhenoMean(model,as.matrix(expr))
+PEER_setNk(model,10)
+PEER_getNk(model)
+PEER_update(model)
+factors = PEER_getX(model)
+weights = PEER_getW(model)
+precision = PEER_getAlpha(model)
+residuals = PEER_getResiduals(model)
+out_plot <- paste(file_path_sans_ext(args[1]), "_hidden_factors.png", sep="")
+png(filename = out_plot, width = 600, height = 1000)
+PEER_plotModel(model)
+dev.off()
+
+#Get hidden covariates
+out_table <- paste(file_path_sans_ext(args[1]), "_hidden_factors", sep="")
+results = PEER_getX(model)
+write.table(results, file=out_table, sep="\t",quote=FALSE, row.names=FALSE, col.names=FALSE)
+a = PEER_getCovariates(model)
+cor (results[,1], a[,1])
