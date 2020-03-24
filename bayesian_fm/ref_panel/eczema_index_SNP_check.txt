@@ -1,0 +1,42 @@
+1k=analysis=/panfs/panasas01/sscm/qh18484/analysis/bayesian_fm/RefPanel/1kGenomes/diagnostics
+ukbb=/panfs/panasas01/sscm/qh18484/analysis/bayesian_fm/RefPanel/ukbiobank/diagnostics
+gwas=/panfs/panasas01/sscm/qh18484/data/gwas/paternoster2015
+
+
+rs145809981 - 1k dataset (MICB locus) MHC gene.
+This SNP has been merged into rs41293864 on dbSNP.
+
+[qh18484@newblue4 diagnostics]$ grep "31466217" $1k/ALL.chr6.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes_EUR_no_mono.bim
+6       rs41293864      0       31466217        C       T
+
+
+[qh18484@newblue1 paternoster2015]$ grep "rs145809981" $gwas/results.published.tsv
+rs145809981     6       31466217        T       C       0.126556        35466   -0.126822518957159      0.028419584925527       8.22e-06        0       0.729547       47997   7.02666
+
+
+grep "rs41293864" $gwas/results.euro.pval.1k
+6:31466217:SNP  6       31466217        T       C       97697   0.135476        -0.0917085733821651     0.0195522697830881      -4.69043105478675       2.72630084233849e-06   rs41293864
+
+
+Therefore, we should use rsid: rs41293864 to represent this locus, rather than rs145809981.
+This SNP is absent from UK Biobank altogether.
+grep "31466217" $ukbb/data.chr06.bim
+
+Now, for the SNPs missing in the UK Biobank.
+[qh18484@newblue1 paternoster2015]$ grep "rs12188917" $gwas/results.euro.pval.1k
+5:131991085:SNP 5       131991085       C       T       102761  0.207431        0.127115353796851       0.0155060845148255      8.19777253731043        2.4488215748808e-16    rs12188917
+[qh18484@newblue1 diagnostics]$ grep "131991085" $ukbb/data.chr05.bim
+Position missing altogether.
+[qh18484@newblue1 paternoster2015]$ grep "rs12730935" $gwas/results.euro.pval.1k
+1:154419892:SNP 1       154419892       A       G       102760  0.390223        0.0772924676897615      0.0128146304622016      6.03157991311147        1.62364399283238e-09   rs12730935
+[qh18484@newblue1 diagnostics]$ grep "154419892" $ukbb/data.chr01.bim
+Position missing altogether.
+[qh18484@newblue1 paternoster2015]$ grep "rs2592555" $gwas/rresults.euro.pval.1k
+11:36371757:SNP 11      36371757        C       T       102760  0.27004 -0.0725448867162033     0.0151339427039259      -4.79352196155628       1.63878509932048e-06   rs2592555
+[qh18484@newblue1 diagnostics]$ grep "36371757" $ukbb/data.chr11.bim
+Position missing altogether.
+[qh18484@newblue1 paternoster2015]$ grep "rs6419573" $gwas/rresults.euro.pval.1k
+2:103027103:SNP 2       103027103       T       C       102760  0.261749        0.103431656604679       0.0143730852221174      7.19620422520822        6.191187714621e-13     rs6419573
+[qh18484@newblue1 diagnostics]$ grep "103027103" $ukbb/data.chr02.bim
+Position missing altogether.
+
