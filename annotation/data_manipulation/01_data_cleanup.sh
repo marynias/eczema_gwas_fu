@@ -97,6 +97,9 @@ sed -i 's/"//g' gencode.v19.annotation.se
 python $scripts/gene_start_finish_ensembl.py ./gtf/gencode.v19.annotation.gtf >gencode.v19.annotation.ensembl
 sed -i 's/"//g' gencode.v19.annotation.ensembl
 
+python $scripts/gene_start_finish_ensembl.py ./gtf/gencode.v38.annotation.gtf >gencode.v38.annotation.ensembl
+sed -i 's/"//g' gencode.v38.annotation.ensembl
+
 #Generate a ref file listing gene name, chromosome and transcript start and end - based on Ensembl.
 #Download the annotation gtf file from ftp://ftp.ensembl.org/pub/grch37/update/gtf/homo_sapiens/Homo_sapiens.GRCh37.87.gtf.gz
 python $scripts/gene_start_finish_ensembl.py ./gtf/Homo_sapiens.GRCh37.87.gtf >Homo_sapiens.GRCh37.87.ensembl

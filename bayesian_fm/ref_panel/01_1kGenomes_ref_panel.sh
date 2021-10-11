@@ -15,6 +15,13 @@ cd $analysis
 input_vcf=ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf
 wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/${input_vcf}.gz
 wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/integrated_call_samples_v3.20130502.ALL.panel
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chrX.phase3_shapeit2_mvncall_integrated_v1b.20130502.genotypes.vcf.gz
+
+#Download all the other chromosome files
+for a in {2..22}
+do
+wget ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/ALL.chr$a.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz
+done
 
 #Format locus file from raw data in results.published tsv.
 python $scripts/tab2locus_paintor.py --tab $gwas/results.published.tsv \
