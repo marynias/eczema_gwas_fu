@@ -9,7 +9,7 @@ if (length(args) < 3) {
 
 
 my_master_file <- args[1]
-my_significant_file <- args[2]
+input <- args[2]
 output <- args[3]
 
 
@@ -17,7 +17,7 @@ output <- args[3]
 #My annotation master table
 my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
 #Read in POSTGAP result file.
-my_postgap <- read.delim(my_significant_file, stringsAsFactors = F, header=T)
+my_postgap <- read.delim(input, stringsAsFactors = F, header=T)
 #Keep only necessary columns
 my_postgap <- my_postgap[c("gene_symbol", "gene_id", "score")]
 #Get unique rows
@@ -36,14 +36,14 @@ temp_join2_rearr <- temp_join2[col_order]
 #Join the two temporary join
 all_matching <- rbind(temp_join, temp_join2_rearr)
 #Remove duplicates in case of multiple scores per gene - select highest.
-all_matching_temp <- as_tibble(all_matching) %>% group_by(rsid, gene_symbol)%>% slice_max(order_by = score, n = 1) %>% ungroup()
+all_matching_temp <- as_tibble(all_matching) %>% group_by(rsid, gene_symbol) %>% top_n(1, score) %>% unique() %>% ungroup()
 #Get top 3 scores per locus
-all_matching2 <- all_matching_temp %>% group_by(rsid) %>% mutate(rank = dense_rank(desc(score))) %>% slice_max(order_by = score, n = 3)
+all_matching2 <- all_matching_temp %>% group_by(rsid) %>% arrange(score, .by_group = TRUE) %>% mutate(rank = dplyr::dense_rank(desc(score))) %>% top_n(3, score)
 #Prepare output for final merge.
 #Combine into a df with gene names and yes as values
-postgap_prioritized <- data.frame(POSTGAP_prioritization_rank=all_matching2$rank, HGNC_symbol=all_matching2$HGNC_symbol)
+postgap_prioritized <- data.frame(POSTGAP_prioritization_rank=all_matching2$rank, HGNC_symbol=all_matching2$HGNC_symbol, rsid=all_matching2$rsid)
 #Join with the master table
-combined <- merge(my_master, postgap_prioritized, by="HGNC_symbol", all.x=T)
+combined <- merge(my_master, postgap_prioritized, by=c("HGNC_symbol", "rsid"), all.x=T)
 #Remove duplicate rows. 
 combined <- unique(combined)
 #Resort the table.

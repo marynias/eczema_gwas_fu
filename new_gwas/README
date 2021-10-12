@@ -1,13 +1,16 @@
 #################################
 New Tools for the New Eczema GWAS
 #################################
-eQTL Catalogue API + new version of coloc
-Open Targets Genetics
-GARFIELD
-DEPICT
-PoPs
+Run order of individual analyses:
+1) loci_definition/data_preprocessing.sh
+2) loci_definition/get_genes_overlapping_intervals.sh
+3) open_targets_genetics/1_open_targets_analysis.sh - POSTGAP pipeline and Open Targets V2G prioritization pipeline
 
-Other:
-Complex-Traits Genetics Virtual Lab - webserver
-Open Targets pipeline STOP GAP - VM
+Run independently in web browser:
+1) MendelVar
 
+
+Run order for integration of results from different sources
+1) integration/1_loci_prep/1_loci_prep.sh
+2) integraion/postgap/postgap_integration.sh
+3) integration/open_targets/open_targets_annotation.sh
