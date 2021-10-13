@@ -1,18 +1,23 @@
 #!/bin/bash
-set -e -u -o pipefail
-HOME=/panfs/panasas01/sscm/qh18484
-analysis=$HOME/new_gwas/garfield/
+HOME=/mnt/storage/home/qh18484
+analysis=$HOME/scratch/new_gwas/garfield/
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/garfield
-garfield=$HOME/bin/garfield/garfield-v2
+garfield=$HOME/scratch/garfield/garfield-v2
+gwas=$HOME/scratch/new_gwas/gwas/raw
+
+gwas_name="eczema21_discovery"
+
+cd $analysis
 
 #The pipeline requires GChr37 coordinates.
 
-#Preparation of Paternoster 2015 GWAS for input. Full summary stats SNPs.
+#Preparation of GWAS for input. Full summary stats SNPs.
 #Need to use a header-less file with summary stats.
+tail -n +2 $gwas/results.${gwas_name}.txt >$gwas/results.${gwas_name}_headerless.txt
 
-#First modify the input generating file in $HOME/bin/garfield/garfield-v2/garfield-create-input-gwas.sh
-$HOME/bin/garfield/garfield-v2/garfield-create-input-gwas.sh
+#First modify the input generating file and run it.
+$garfield/garfield-create-input-gwas.sh
 
-#Now modify the input folder in the garfield run file $HOME/bin/garfield/garfield-v2/garfield
+#Now modify the input folder in the garfield run file (garfield-v2/garfield)
 cd $garfield
-qsub $scripts/sub_run_garfield.sh
+sbatch $scripts/sub_run_garfield.sh

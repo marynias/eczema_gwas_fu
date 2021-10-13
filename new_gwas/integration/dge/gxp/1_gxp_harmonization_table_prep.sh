@@ -1,21 +1,24 @@
 #!/bin/bash
-set -e -u -o pipefail
-HOME=/panfs/panasas01/sscm/qh18484
-analysis=$HOME/new_gwas/integration/dge/gxp
+HOME=/mnt/storage/home/qh18484
+analysis=$HOME/scratch/new_gwas/integration/dge/gxp
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/dge/gxp
 old_scripts=$HOME/bin/eczema_gwas_fu/final_integration
-data_manipulation=$HOME/analysis/annotation/data_manipulation
-master=$HOME/new_gwas/integration/1_loci_prep
+data_manipulation=$HOME/scratch/new_gwas/genome
+master=$HOME/scratch/new_gwas/integration/1_loci_prep
+
+gwas_name="eczema21_discovery"
 
 cd $analysis
 
+###########The below code has already been run. It only needs to be run once.
 #Make sure that the IDs are converted to HUGO gene symbol.
+: '
 python $old_scripts/sync_ids.py --tab Table_E1_Cole_\(2014\)_Filaggrin-stratified_transcriptomic_analysis_supp1.txt \
 --db $data_manipulation/hugo_synonyms_ids2_filtered.hugo.upper \
 --head 1 --my_id 2 --delim $'\t' --delim_c $',' --convert upper >temp
 mv temp Table_E1_Cole_\(2014\)_Filaggrin-stratified_transcriptomic_analysis_supp1.txt
 
-python $old_scripts/sync_ids.py --tab Ewald2015_12920_2015_133_MOESM7_ESM.txt \
+#python $old_scripts/sync_ids.py --tab Ewald2015_12920_2015_133_MOESM7_ESM.txt \
 --db $data_manipulation/hugo_synonyms_ids2_filtered.hugo.upper \
 --head 1 --my_id 1 --delim $'\t' --delim_c $',' --convert upper >temp
 mv temp Ewald2015_12920_2015_133_MOESM7_ESM.txt
@@ -78,7 +81,7 @@ python $old_scripts/sync_ids.py --tab Pavel2019_AD_lesional_normal_rnaseq.txt \
 --db $data_manipulation/hugo_synonyms_ids2_filtered.hugo.upper \
 --head 1 --my_id 1 --delim $'\t' --delim_c $',' --convert upper >temp
 mv temp Pavel2019_AD_lesional_normal_rnaseq.txt
-
 Rscript --vanilla $scripts/prepare_gxp_tables.R
-Rscript --vanilla $scripts/merge_gxp_tables.R $master/paternoster2015_master.csv \
-paternoster2015_dge_gxp.csv
+'
+Rscript --vanilla $scripts/merge_gxp_tables.R $master/${gwas_name}_master.csv \
+${gwas_name}_dge_gxp.csv

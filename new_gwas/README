@@ -5,12 +5,22 @@ Run order of individual analyses:
 1) loci_definition/data_preprocessing.sh
 2) loci_definition/get_genes_overlapping_intervals.sh
 3) open_targets_genetics/1_open_targets_analysis.sh - POSTGAP pipeline and Open Targets V2G prioritization pipeline
+4) ctg-vl/1_ctg-vl_analysis.sh
+5) ldhub/1_ldhub_analysis.shls
+6) garfield/1_garfield_analysis.sh
+7) pops/1_pops_analysis.sh
+8) depict/1_depict_analysis.sh
 
 Run independently in web browser:
 1) MendelVar
+2) FUMA
 
 
 Run order for integration of results from different sources
 1) integration/1_loci_prep/1_loci_prep.sh
 2) integraion/postgap/postgap_integration.sh
 3) integration/open_targets/open_targets_annotation.sh
+4) integration/mendelvar/mendelvar_integration.sh
+5) integration/dge/gxp/1_gxp_harmonization_table_prep.sh
+6) integration/dge/proteome/1_proteome_harmonization_table_prep.sh
+7) integration/depict/depict_integration.sh

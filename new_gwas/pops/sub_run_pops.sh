@@ -1,9 +1,17 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=2
-#PBS -l walltime=12:00:00
-#PBS -V
 
-pops=/newhome/qh18484/bin/pops
+#SBATCH --job-name=pops
+#SBATCH --partition=mrcieu
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=14
+#SBATCH --time=99:59:00
+#SBATCH --mem=60G
+#SBATCH -e slurm-%j.err
+#SBATCH -o slurm-%j.out
+
+HOME=/mnt/storage/home/qh18484
+pops=$HOME/scratch/pops
 
 cd $pops
 

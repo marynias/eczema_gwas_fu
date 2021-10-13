@@ -15,7 +15,14 @@ output <- args[3]
 temp = list.files(pattern="*parsed")
 #My annotation master table
 my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
-my_files = lapply(temp, read.delim, stringsAsFactors = F,)
+loadFile <- function(x) {
+  df <- read.delim(x, header=T, stringsAsFactors=F, row.names=NULL, sep="\t")
+  ontology <- gsub("\\.out\\.inrich\\.parsed", "", x)
+  df$Ontology <- toupper(ontology)
+  return(df)
+}
+
+my_files = lapply(temp, loadFile)
 final_df = do.call(rbind, my_files)
 #Find significant pathways
 significant_df <- final_df[final_df$Bootstrapped_p_value < 0.06,]
@@ -51,6 +58,15 @@ listed_genes <- as.list(strsplit(list_genes, ","))
 listed_genes <- unlist(listed_genes)
 #Remove whitespace
 listed_genes <- gsub("\\s", "", listed_genes) 
+
+#Find terms with "kera", "derma", "skin" keywords among OMIM disease descriptions
+my_input <- "disease_overlap.txt"
+my_disease <- read.delim(my_input, header=T, stringsAsFactors=F, row.names=NULL, sep="\t")
+skin_matches2 <- str_detect(my_disease$disease_description, regex(paste(my_search_terms, collapse = '|'), ignore_case = TRUE))
+skin_matches_df2 <- my_disease[skin_matches2,]
+#Obtain the names of the genes with the keywords
+listed_genes2 <- skin_matches_df2$gene_name
+listed_genes <- c(listed_genes, listed_genes2)
 #Remove duplicate names
 final_list <- unique(listed_genes)
 #Turn into a dataframe
@@ -65,9 +81,9 @@ combined2 <- merge(combined, mendelvar_keywords, by="HGNC_symbol", all.x=T)
 combined2 <- combined2[gtools::mixedorder(combined2$cytoband), ]
 my_col_order <- c("rsid",	"cytoband",	"Ensembl_gene_ID", "HGNC_ID", "HGNC_symbol", "MendelVar_sig_enrichment",
                   "MendelVar_skin_keywords")
-combined <- combined[my_col_order]
+combined2 <- combined2[my_col_order]
 #Write table to file
-write.table(combined2, "paternoster2015_mendelvar.csv", quote=F, sep=",", row.names=F, na="")
+write.table(combined2, output, quote=F, sep=",", row.names=F, na="")
 
 
 

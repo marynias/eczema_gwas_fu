@@ -12,6 +12,9 @@ cd $analysis
 #will have to find its proxy manually. May want to use the following synonym list:
 $HOME/analysis/annotation/data_manipulation/rsid_synonyms.txt
 
+#In that instance, MendelVar generated intervals for all the SNPs. The generated bed file is in:
+cat $input/${gwas_name}_interval.bed
+
 #First, make sure to run the scripts in $HOME/bin/eczema_gwas_fu/new_gwas/loci_definition.
 #Create the basic table for each locus. Use only gene with assigned HGNC ID.
 Rscript --vanilla $scripts/create_master_table.R $gwas/leadSNPs.${gwas_name}_cytoBand.bed \

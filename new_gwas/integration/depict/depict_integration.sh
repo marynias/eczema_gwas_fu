@@ -1,19 +1,22 @@
 #!/bin/bash
-set -e -u -o pipefail
-HOME=/panfs/panasas01/sscm/qh18484
-analysis=$HOME/new_gwas/integration/depict
+HOME=/mnt/storage/home/qh18484
+analysis=$HOME/scratch/new_gwas/integration/depict
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/depict
 old_scripts=$HOME/bin/eczema_gwas_fu/final_integration
-data_manipulation=$HOME/analysis/annotation/data_manipulation
-master=$HOME/new_gwas/integration/1_loci_prep
+data_manipulation=$HOME/scratch/new_gwas/genome
+master=$HOME/scratch/new_gwas/integration/1_loci_prep
+depict=$HOME/scratch/depict/results
+
+gwas_name="eczema21_discovery"
 
 cd $analysis
 
 #Make sure that the IDs are converted to HUGO gene symbol.
-python $old_scripts/sync_ids.py --tab paternoster_2015_depict.top_geneprioritization.txt --db $data_manipulation/hugo_synonyms_ids2_filtered.hugo.upper \
---head 1 --my_id 5 --delim $'\t' --delim_c $',' --convert upper >paternoster_2015_depict.top_geneprioritization_syn.txt
+python $old_scripts/sync_ids.py --tab $depict/${gwas_name}_geneprioritization.txt \
+--db $data_manipulation/hugo_synonyms_ids2_filtered.hugo.upper \
+--head 1 --my_id 5 --delim $'\t' --delim_c $',' --convert upper >${gwas_name}_geneprioritization_syn.txt
 #Annotate the master file.
-Rscript --vanilla $scripts/depict_annotation.r $master/paternoster2015_master.csv \
-paternoster_2015_depict.top_geneprioritization_syn.txt  \
-paternoster2015_depict.csv
+Rscript --vanilla $scripts/depict_annotation.r $master/${gwas_name}_master.csv \
+${gwas_name}_geneprioritization_syn.txt \
+${gwas_name}_depict.csv
 

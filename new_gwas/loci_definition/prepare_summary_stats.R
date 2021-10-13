@@ -19,3 +19,9 @@ EFFECT_ALLELE_FREQ, BETA, SE, Z_SCORE, PVAL, RSID, MAF)
 
 output_file <- paste0("results.", gwas_name, ".txt")
 write.table(my_gwas2, output_file, sep="\t", quote=F, row.names=F)
+
+#Keeping minimal number of stats for FUMA to run.
+my_gwas3 <- my_gwas2 %>% dplyr::select(CHR, POS, EFFECT_ALLELE, NON_EFFECT_ALLELE, N, PVAL, RSID)
+
+output_file2 <- paste0("results.", gwas_name, "_fuma.txt")
+write.table(my_gwas3, output_file2, sep="\t", quote=F, row.names=F)
