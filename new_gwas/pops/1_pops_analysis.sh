@@ -34,4 +34,7 @@ sbatch --export=ALL,gwas=$gwas_name $scripts/sub_run_pops.sh
 #Annotate PoPs results (gathered into a single folder) with gene names and print into one file.
 curl -o "hgnc_complete_set.txt" http://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt
 
-python $scripts/annotate_pops.py $pops/pops_results/ >${gwas_name}_pops_annotated.txt
+mkdir $pops/$gwas_name
+mv $pops/${gwas_name}*.results $pops/${gwas_name}/
+
+python $scripts/annotate_pops.py $pops/${gwas_name}/ >${gwas_name}_pops_annotated.txt

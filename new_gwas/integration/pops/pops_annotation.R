@@ -37,15 +37,16 @@ all_matching_temp <- as_tibble(all_matching) %>% group_by(rsid, HGNC_symbol)%>% 
 all_matching2 <- as_tibble(all_matching_temp) %>% group_by(rsid) %>% mutate(rank = dense_rank(desc(Score))) %>% slice_max(order_by = Score, n = 3)
 #Prepare output for final merge.
 #Combine into a df with gene names and yes as values
-pops_prioritized <- data.frame(pops_prioritization_rank=all_matching2$rank, HGNC_symbol=all_matching2$HGNC_symbol)
+pops_prioritized <- data.frame(pops_prioritization_rank=all_matching2$rank, HGNC_symbol=all_matching2$HGNC_symbol, rsid=all_matching2$rsid)
 #Join with the master table
-combined <- merge(my_master, pops_prioritized, by="HGNC_symbol", all.x=T)
+combined <- merge(my_master, pops_prioritized, by=c("HGNC_symbol", "rsid"), all.x=T)
 #Remove duplicate rows. 
 combined <- unique(combined)
 #Resort the table.
 combined <- combined[gtools::mixedorder(combined$cytoband), ]
 my_col_order <- c("rsid",	"cytoband",	"Ensembl_gene_ID", "HGNC_ID", "HGNC_symbol", "pops_prioritization_rank")
-combined <- combined[my_col_order]
+#Remove duplicates
+combined <- combined %>% unique()
 #Write table to file
 write.table(combined, output, quote=F, sep=",", row.names=F, na="")
 

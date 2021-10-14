@@ -10,3 +10,9 @@ cd $analysis
 #Check that all the tables have the same number of rows and then join by rsid,gene name,cytoband etc.
 
 Rscript --vanilla $scripts/create_summary_tables.R
+
+##Plot the overall results
+Rsript --vanilla $scripts/plot_summary_table_ranking.R
+
+##Plot colocalisation results.
+Rsript --vanilla $scripts/plot_summary_table_coloc.R
