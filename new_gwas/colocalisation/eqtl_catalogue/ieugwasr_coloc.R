@@ -5,9 +5,16 @@ library(tools)
 library(Hmisc)
 library(hablar)
 
+args = commandArgs(trailingOnly=TRUE)
 
+if (length(args) < 3) {
+  stop("At least 3 arguments must be supplied.n", call.=FALSE)}
+
+my_interval <- args[1]
+gene_list <- args[2]
+gwas_name <- args[3]
 #Load required functions
-source("ieugwasr_helper_functions.R")
+source("/mnt/storage/home/qh18484/bin/eczema_gwas_fu/new_gwas/colocalisation/eqtl_catalogue/ieugwasr_helper_functions.R")
 
 #Create an empty data frame to store all the colocalisation results.
 coloc_all <- data.frame(nsnps=double(),
@@ -40,7 +47,7 @@ coloc_all <-  dplyr::as_tibble(coloc_all)
 
 
 #Read in the file with target SNPs and interval ranges in GRCh37.
-my_ranges <- read.table("interval_r2_0.2_1k.bed", stringsAsFactors = F, header=F)
+my_ranges <- read.table(my_interval, stringsAsFactors = F, header=F)
 colnames(my_ranges) <- c("chrom", "start", "end", "rsid")
 my_rsids <- unique(my_ranges$rsid)
 
@@ -56,7 +63,7 @@ uniprot_hugo <- read.delim("UniProt_IDs_HGNC.txt", stringsAsFactors = F, header=
 uniprot_long <- read.delim("UniProt_IDs_long.txt", stringsAsFactors = F, header=T, sep="\t")
 
 #Read in file with the list of transcripts within 1 Mbp of each index SNP.
-my_genes <- read.table("paternoster_2015_index_snps_sorted_1Mbp_genes_processed.bed", stringsAsFactors = F, header=F)
+my_genes <- read.table(gene_list, stringsAsFactors = F, header=F)
 colnames(my_genes) <- c("chrom", "start", "end", "rsid", "gene_chrom", "gene_start", "gene_end", "strand", "type", "Ensembl_transcript_id", "Ensembl_gene_id", "hugo_gene_name", "hugo_gene_id", "file")
 
 #IEU GWAS catalog
@@ -86,7 +93,7 @@ my_end= my_ranges[my_ranges$rsid == my_rsid,]$end
 coordinates <- paste(my_chrom, ":", my_start, "-", my_end, sep="")
 
 #Load file with my eczema summary stats for a given variant.
-eczema_file = paste("GWAS_intervals/", my_rsid, "_r2_0.2_1k.gwas",sep="")
+eczema_file = paste("GWAS_intervals/", my_rsid, "_", gwas_name, ".gwas",sep="")
 my_eczema <- read.table(eczema_file, stringsAsFactors = F, header=T)
 my_eczema <- my_eczema %>% dplyr::as_tibble() %>% dplyr::rename(MAF = maf) %>%
   hablar::convert(num(CHR, POS, N, MAF, BETA, SE, Z_SCORE, PVAL))
@@ -98,7 +105,7 @@ merged_sun = merged_sun_0[merged_sun_0$rsid == my_rsid,]
 merged_eqtlgen = merged_eqtlgen_0[merged_eqtlgen_0$rsid == my_rsid,]
 
 if (dim(merged_sun)[1] > 0) {
-process_coloc(merged_sun, my_eczema, "Sun2018", "protein", coordinates)}
+process_coloc(merged_sun, my_eczema, "Sun2018", "protein", coordinates, gwas_name)}
 if (dim(merged_eqtlgen)[1] > 0) {
-process_coloc(merged_eqtlgen, my_eczema, "eQTLgen", "ge", coordinates)}
+process_coloc(merged_eqtlgen, my_eczema, "eQTLgen", "ge", coordinates, gwas_name)}
 }

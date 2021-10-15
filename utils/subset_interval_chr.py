@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import os, sys
+import os, sys, re
 import argparse, gzip
 from collections import defaultdict as dd
 
@@ -28,6 +28,7 @@ to_retain = dd(list)
 with open(bed, 'r') as bed_fh:
 	for line in bed_fh:
 		lines = line.strip().split()
+		lines[0] = re.sub('chr', '', lines[0])
 		to_retain[lines[0]].append((lines[1], lines[2]))
 
 out_fh = open(output, 'w')

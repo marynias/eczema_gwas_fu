@@ -1,12 +1,15 @@
 #!/bin/bash
-#PBS -l nodes=1:ppn=1
-#PBS -l walltime=48:00:00
-#PBS -V
+#SBATCH --job-name=coloc
+#SBATCH --partition=mrcieu
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=14
+#SBATCH --time=24:00:00
+#SBATCH --mem=10G
+#SBATCH -e slurm-%j.err
+#SBATCH -o slurm-%j.out
 
-HOME=/panfs/panasas01/sscm/qh18484
+HOME=/mnt/storage/home/qh18484
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/colocalisation/eqtl_catalogue
 
-cd $PBS_O_WORKDIR
-
-
-Rscript --vanilla $scripts/eQTL_Catalogue_coloc_local.R $my_rsid
+Rscript --vanilla $scripts/eQTL_Catalogue_coloc_local.R $my_rsid $hg38 $gene_list $gwas

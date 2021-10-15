@@ -14,7 +14,7 @@ Run order of individual analyses:
 10) snpsea/01_snpsea_analysis.sh
 
 Run independently in web browser:
-1) MendelVar
+1) MendelVar - needed to generate GRCh37 intervals
 2) FUMA
 3) VEP
 4) CTG-VL (SMR, smultixcan, LDscore)

@@ -1,19 +1,22 @@
 library("dplyr")
-library("readr")
 library("coloc")
-#library("GenomicRanges")
-#library("Rsamtools")
 library("hablar")
 library("tools")
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 1) {
-  stop("At least one argument must be supplied (rsid).n", call.=FALSE)}
+if (length(args) < 4) {
+  stop("At least 4 arguments must be supplied.n", call.=FALSE)}
 
 
 my_rsid <- args[1]
-
+hg38 <- args[2]
+gene_list <- args[3]
+gwas_name <- args[4]
+#my_rsid <- "rs989437"
+#hg38 <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_interval_mapped.bed"
+#gene_list <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_sorted_1Mbp_genes_processed"
+#gwas_name <- "eczema21_discovery"
 
 #This script contains all coloc runs for a given SNP and accepts SNP rsid as an argument.
 #The main result (H4 result) also saved in aggregate column - one table per RSID.
@@ -21,7 +24,7 @@ my_rsid <- args[1]
 #USe imported GTEx as version 8
 
 #Load required functions
-source("/newhome/qh18484/bin/eczema_gwas_fu/new_gwas/colocalisation/eqtl_catalogue/eQTL_Catalogue_helper_functions.R")
+source("/mnt/storage/home/qh18484/bin/eczema_gwas_fu/new_gwas/colocalisation/eqtl_catalogue/eQTL_Catalogue_helper_functions.R")
 
 #Create an empty data frame to store all the colocalisation results.
 coloc_all <- data.frame(nsnps=double(),
@@ -53,15 +56,11 @@ missing_runs <- data.frame(rsid= character(),
 coloc_all <-  dplyr::as_tibble(coloc_all)
 
 #Read in the file with target SNPs and interval ranges lifted over to GRCh38.
-my_ranges <- read.table("interval_r2_0.2_1k_hg38.bed", stringsAsFactors = F, header=F)
+my_ranges <- read.table(hg38, stringsAsFactors = F, header=F)
 colnames(my_ranges) <- c("chrom", "start", "end", "rsid")
 
-#Read in the file with 1Mbp interval around index SNPs.
-#my_ranges <- read.table("paternoster_2015_index_snps_sorted_1Mbp.bed", stringsAsFactors = F, header=F)
-#colnames(my_ranges) <- c("chrom", "start", "end", "rsid")
-
 #Read in file with the list of genes within 1 Mbp of each index SNP.
-my_genes <- read.table("paternoster_2015_index_snps_sorted_1Mbp_genes_processed.bed", stringsAsFactors = F, header=F)
+my_genes <- read.table(gene_list, stringsAsFactors = F, header=F)
 colnames(my_genes) <- c("chrom", "start", "end", "rsid", "gene_chrom", "gene_start", "gene_end", "strand", "type", "Ensembl_transcript_id", "Ensembl_gene_id", "hugo_gene_name", "huge_gene_id", "file")
 
 #Lookup my LD interval range. Need to use a file with GRCh38 coordinates.
@@ -75,9 +74,9 @@ coordinates <- paste(my_chrom, ":", my_start, "-", my_end, sep="")
 my_ensembl_genes = unique(my_genes[my_genes$rsid == my_rsid,]$Ensembl_gene_id)
 
 #Load file with my eczema summary stats for a given variant.
-eczema_file = paste("GWAS_intervals/", my_rsid, "_r2_0.2_1k.gwas",sep="")
+eczema_file = paste("GWAS_intervals/", my_rsid, "_", gwas_name, ".gwas",sep="")
 my_eczema <- read.table(eczema_file, stringsAsFactors = F, header=T)
-my_eczema <- my_eczema %>% dplyr::as_tibble() %>% dplyr::rename(MAF = maf) %>%
+my_eczema <- my_eczema %>% dplyr::as_tibble() %>%
   hablar::convert(num(CHR, POS, N, MAF, BETA, SE, Z_SCORE, PVAL))
 
 #Load list of eQTL Catalog resources
@@ -102,14 +101,15 @@ tabix_paths_all <- bind_rows(tabix_paths, imported_tabix_paths)
 tabix_paths_all <- tabix_paths_all %>% filter (quant_method == "ge" | quant_method == "microarray")
 
 #Change file paths to local
-tabix_paths_all$ftp_path <- gsub("ftp://ftp.ebi.ac.uk/pub/databases/spot/eQTL/csv/\\w+/ge", "catalog", tabix_paths_all$ftp_path)
-tabix_paths_all$ftp_path <- gsub("ftp://ftp.ebi.ac.uk/pub/databases/spot/eQTL/csv/\\w+/microarray", "catalog", tabix_paths_all$ftp_path)
+tabix_paths_all$ftp_path <- gsub("ftp://ftp.ebi.ac.uk/pub/databases/spot/eQTL/csv/\\w+/ge", "/mnt/storage/home/qh18484/scratch/GTEx_V8_complete", tabix_paths_all$ftp_path)
+tabix_paths_all$ftp_path <- gsub("ftp://ftp.ebi.ac.uk/pub/databases/spot/eQTL/csv/\\w+/microarray", "/mnt/storage/home/qh18484/scratch/GTEx_V8_complete", tabix_paths_all$ftp_path)
 
 #Extract column names from first file
 
 #column_names = colnames(readr::read_tsv("catalog/Alasoo_2018_ge_macrophage_naive.all.tsv.gz", n_max = 1))
-column_names = colnames(readr::read_tsv("catalog/header.tsv", n_max = 1))
-column_names_gtex = colnames(readr::read_tsv("catalog/header_gtex.tsv", n_max = 1))
+
+column_names = colnames(read.delim("/mnt/storage/home/qh18484/scratch/GTEx_V8_complete/header.tsv", sep = "\t", header = TRUE, stringsAsFactors = FALSE))
+column_names_gtex = colnames(read.delim("/mnt/storage/home/qh18484/scratch/GTEx_V8_complete/header_gtex.tsv", sep = "\t", header = TRUE, stringsAsFactors = FALSE))
 
 
 for (a in 1:nrow(tabix_paths_all)) {
@@ -139,11 +139,7 @@ if (dim(summary_stats)[1] == 0)
   next
   }
 
-#Summary stats without rsids
-#summary_stats = import_eQTLCatalogue_no_rsid(platelet_df$ftp_path, region, selected_gene_id = my_gene, column_names)
 
-#Merge the GWAS and eQTL file by chrom and pos
-#merged <- merge(summary_stats,my_eczema, by.x=c("chromosome", "position"), by.y=c("CHR", "POS"))
 #Merge the GWAS and eQTL file by RSID
 merged <- merge(summary_stats,my_eczema, by.x="rsid", by.y="RSID")
 
@@ -154,7 +150,7 @@ if (length(to_drop) > 0){
   merged <- merged[-to_drop,]
 }
 #Make sure that alleles are harmonised (but not needed for coloc)
-#In eQTL Catalog, tte ALT allele is always the effect allele
+#In eQTL Catalog, the ALT allele is always the effect allele
 effect_diff <- which(merged$EFFECT_ALLELE != merged$ALT) # The position of SNPs where effect alleles are different
 #Where the alleles are different, flip the beta in eQTL catalog data
 merged$beta[effect_diff] <- merged$beta[effect_diff]*(-1)
@@ -178,8 +174,8 @@ coloc_res <- coloc_res %>% tibble::add_column("hugo_name" = my_hugo_name, "ensem
 coloc_all <- bind_rows(coloc_all, coloc_res)
 
 #Save df to file
-output_file <- paste(my_rsid, "_coloc.txt", sep="")
-output_file2 <- paste(my_rsid, "_missing_runs.txt", sep="")
+output_file <- paste(my_rsid, "_", gwas_name, "_coloc.txt", sep="")
+output_file2 <- paste(my_rsid,  "_", gwas_name,"_missing_runs.txt", sep="")
 write.table(coloc_all, file=output_file, quote=F, sep="\t", row.names=F)
 write.table(missing_runs, file=output_file2, quote=F, sep="\t", row.names=F)
 }}

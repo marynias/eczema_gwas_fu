@@ -19,6 +19,8 @@ sbatch --export=ALL,my_gwas=${gwas_name}.snpsea,gene_matrix=$snpsea/ImmGen2012.g
 sbatch --export=ALL,my_gwas=${gwas_name}.snpsea,gene_matrix=$snpsea/FANTOM2014.gct.gz,output=${gwas_name}_FANTOM2014 $scripts/sub_snpsea.sh
 sbatch --export=ALL,my_gwas=${gwas_name}.snpsea,gene_matrix=$snpsea/GO2013.gct.gz,output=${gwas_name}_GO2013 $scripts/sub_snpsea.sh
 
+source activate myenv
+
 #Visualize the results
 for a in ${gwas_name}_GeneAtlas2004 ${gwas_name}_ImmGen2012 ${gwas_name}_FANTOM2014 ${gwas_name}_GO2013
 do

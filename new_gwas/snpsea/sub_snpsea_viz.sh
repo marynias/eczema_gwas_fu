@@ -14,5 +14,5 @@
 snpsea=/mnt/storage/home/qh18484/scratch/snpsea
 
 python $snpsea/bin/snpsea-barplot $output
-python $snpsea/bin/snpsea-heatmap $output
-Rscript $snpsea/bin/snpsea-type1error $output
+#python $snpsea/bin/snpsea-heatmap $output
+#Rscript $snpsea/bin/snpsea-type1error $output

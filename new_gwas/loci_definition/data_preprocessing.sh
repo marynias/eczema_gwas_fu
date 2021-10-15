@@ -2,6 +2,7 @@
 HOME=/mnt/storage/home/qh18484
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/loci_definition
 gwas=$HOME/scratch/new_gwas/gwas/raw
+analysis=$HOME/scratch/new_gwas/loci_definition
 
 cd $gwas
 
@@ -21,4 +22,10 @@ Rscript --vanilla $scripts/prepare_lead_SNPs.R $input_file $gwas_name
 #Basic data check - in each column in summary data, count the number of values and explore the top hits.
 Rscript --vanilla $scripts/gwas_data_check.R $gwas_name
 
+cd $analysis
 
+#LiftOVer the GRCH37 intervals from MendelVar to GRCH38, used for colocalization with eQTL Catalogue data.
+$HOME/bin/liftover/liftOver ${gwas_name}_interval.bed $HOME/bin/liftover/hg19ToHg38.over.chain \
+${gwas_name}_interval_mapped.bed ${gwas_name}_interval_unmapped.bed
+
+#All intervals mapped successfully

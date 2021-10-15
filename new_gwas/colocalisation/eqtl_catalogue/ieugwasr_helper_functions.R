@@ -19,7 +19,7 @@ run_coloc <- function(merged){
   return(res_formatted)
 }
 
-process_coloc <- function(merged_sun, my_eczema, my_study, my_feature, coordinates) {
+process_coloc <- function(merged_sun, my_eczema, my_study, my_feature, coordinates, gwas_name) {
 for (a in 1:nrow(merged_sun)) {
   row <- merged_sun[a,] 
   my_gwas_id <- row$id
@@ -58,8 +58,8 @@ for (a in 1:nrow(merged_sun)) {
   coloc_all <- bind_rows(coloc_all, coloc_res)
   
   #Save df to file
-  output_file <- paste(my_rsid, "_", my_study, "_ieu_coloc.txt", sep="")
-  output_file2 <- paste(my_rsid, "_", my_study, "_ieu_missing_runs.txt", sep="")
+  output_file <- paste(my_rsid, "_", gwas_name, "_", my_study, "_ieu_coloc.txt", sep="")
+  output_file2 <- paste(my_rsid, "_", gwas_name, "_", my_study, "_ieu_missing_runs.txt", sep="")
   write.table(coloc_all, file=output_file, quote=F, sep="\t", row.names=F)
   write.table(missing_runs, file=output_file2, quote=F, sep="\t", row.names=F)
   
