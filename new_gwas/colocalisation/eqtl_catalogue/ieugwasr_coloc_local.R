@@ -4,6 +4,7 @@ library(dplyr)
 library(tools)
 library(Hmisc)
 library(hablar)
+library(gwasvcf)
 
 args = commandArgs(trailingOnly=TRUE)
 
@@ -13,6 +14,10 @@ if (length(args) < 3) {
 my_interval <- args[1]
 gene_list <- args[2]
 gwas_name <- args[3]
+
+my_interval <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_interval.bed"
+gene_list <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_sorted_1Mbp_genes_processed"
+gwas_name <- "eczema21_discovery"
 #Load required functions
 source("/mnt/storage/home/qh18484/bin/eczema_gwas_fu/new_gwas/colocalisation/eqtl_catalogue/ieugwasr_helper_functions.R")
 
@@ -66,8 +71,8 @@ uniprot_long <- read.delim("UniProt_IDs_long.txt", stringsAsFactors = F, header=
 my_genes <- read.table(gene_list, stringsAsFactors = F, header=F)
 colnames(my_genes) <- c("chrom", "start", "end", "rsid", "gene_chrom", "gene_start", "gene_end", "strand", "type", "Ensembl_transcript_id", "Ensembl_gene_id", "hugo_gene_name", "hugo_gene_id", "file")
 
-#IEU GWAS catalog
-c <- gwasinfo()
+#Read in IEU GWAS catalog
+c <- read.delim("opengwas_list.tsv", stringsAsFactors = F, header=T, sep="\t")
 #Filter to only eQTLgen
 eqtlgen <- c[c$author=="Vosa U",]
 #Filter to only Sun pQTL
@@ -96,7 +101,7 @@ coordinates <- paste(my_chrom, ":", my_start, "-", my_end, sep="")
 #Load file with my eczema summary stats for a given variant.
 eczema_file = paste("GWAS_intervals/", my_rsid, "_", gwas_name, ".gwas",sep="")
 my_eczema <- read.table(eczema_file, stringsAsFactors = F, header=T)
-my_eczema <- my_eczema %>% dplyr::as_tibble() %>% dplyr::rename(MAF = maf) %>%
+my_eczema <- my_eczema %>% dplyr::as_tibble() %>%
   hablar::convert(num(CHR, POS, N, MAF, BETA, SE, Z_SCORE, PVAL))
 
 #Find proteins which overlap between Sun and our Dataset.

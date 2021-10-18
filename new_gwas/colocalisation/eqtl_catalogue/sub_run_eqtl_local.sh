@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=coloc
-#SBATCH --partition=mrcieu
+#SBATCH --partition=mrcieu2
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=14

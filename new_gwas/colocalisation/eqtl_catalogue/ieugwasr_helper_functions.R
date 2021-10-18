@@ -1,15 +1,15 @@
 #SNPs identified by their RSIDs here.
 run_coloc <- function(merged){
-  eQTL_dataset = list(beta = merged$beta,
-                      varbeta = merged$se^2,
-                      N = merged$n, # Samples size is allele number (AN) dvided by 2
+  eQTL_dataset = list(beta = merged$ES,
+                      varbeta = merged$SE_qtl^2,
+                      N = merged$SS, # Samples size is allele number (AN) dvided by 2
                       MAF = merged$MAF, 
                       type = "quant", 
-                      snp = merged$rsid)
+                      snp = merged$ID)
   gwas_dataset = list(beta = merged$BETA,
                       varbeta = merged$SE^2, 
                       type = "cc", 
-                      snp = merged$rsid,
+                      snp = merged$ID,
                       MAF = merged$MAF, 
                       N = merged$N,
                       s=0.2245)
@@ -31,12 +31,12 @@ for (a in 1:nrow(merged_sun)) {
   #Get summary stats
   tryCatch({
     open_gwas <- "/mnt/storage/home/qh18484/opengwas/public/"
-    gwas_input <- paste0(my_qtl_id, "/", my_qtl_id, ".vcf.gz")
-    all_qtls <-  query_gwas(qtl_full_path, chrompos=coordinates) 
-    write.delim(all_qtls, "all_qtls.txt", quote=F)
-    summary_stats <- ieugwasr::associations(coordinates, my_gwas_id)
-    write.delim(summary_stats, "summary_stats.txt", quote=F)
-    merged <- merge(summary_stats,my_eczema, by.x="rsid", by.y="RSID")
+    gwas_input <- paste0(open_gwas, my_gwas_id, "/", my_gwas_id, ".vcf.gz")
+    all_qtls <-  query_gwas(gwas_input, chrompos=coordinates) 
+    all_qtls2 <- vcf_to_granges(all_qtls) %>% dplyr::as_tibble()
+    all_qtls2 <- dplyr::rename(all_qtls2, SE_qtl = SE)
+    write.table(all_qtls2, "summary_stats.txt", quote=F)
+    merged <- merge(all_qtls2,my_eczema, by.x="ID", by.y="RSID")
   },
   error = function(e) {
     #what should be done in case of exeption?
