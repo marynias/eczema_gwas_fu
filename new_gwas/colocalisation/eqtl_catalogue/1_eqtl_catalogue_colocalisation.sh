@@ -41,7 +41,7 @@ do
 	sbatch --export=ALL,my_rsid=$my_r,hg38=$loci/${gwas_name}_interval_mapped.bed,gene_list=$loci/${gwas_name}_sorted_1Mbp_genes_processed,gwas=$gwas_name $scripts/sub_run_eqtl_local.sh 
 done
 
-
+##### Rewrite to use local files from BC4, rather than calls to API.
 #Run coloc using Sun et al. (2018) and eQTLgen from MRC IEU GWAS db.
 #All loci in single job, as running quick.
 #Run it on my local computer.

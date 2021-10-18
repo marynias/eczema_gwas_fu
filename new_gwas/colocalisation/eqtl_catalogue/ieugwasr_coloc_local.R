@@ -1,5 +1,4 @@
 library(ieugwasr)
-library(gwasvcf)
 library(coloc)
 library(dplyr)
 library(tools)
@@ -89,6 +88,7 @@ for (my_rsid in my_rsids) {
 
 #Lookup my LD interval range. Need to use a file with GRCh38 coordinates.
 my_chrom = my_ranges[my_ranges$rsid == my_rsid,]$chrom
+my_chrom = sub("chr", "", my_chrom)
 my_start = my_ranges[my_ranges$rsid == my_rsid,]$start
 my_end= my_ranges[my_ranges$rsid == my_rsid,]$end
 coordinates <- paste(my_chrom, ":", my_start, "-", my_end, sep="")

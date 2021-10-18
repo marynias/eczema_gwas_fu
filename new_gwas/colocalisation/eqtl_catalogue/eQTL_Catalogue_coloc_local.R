@@ -13,7 +13,7 @@ my_rsid <- args[1]
 hg38 <- args[2]
 gene_list <- args[3]
 gwas_name <- args[4]
-#my_rsid <- "rs989437"
+#my_rsid <- "rs112111458"
 #hg38 <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_interval_mapped.bed"
 #gene_list <- "/mnt/storage/home/qh18484/scratch/new_gwas/loci_definition/eczema21_discovery_sorted_1Mbp_genes_processed"
 #gwas_name <- "eczema21_discovery"
@@ -65,6 +65,7 @@ colnames(my_genes) <- c("chrom", "start", "end", "rsid", "gene_chrom", "gene_sta
 
 #Lookup my LD interval range. Need to use a file with GRCh38 coordinates.
 my_chrom = my_ranges[my_ranges$rsid == my_rsid,]$chrom
+my_chrom = sub("chr", "", my_chrom)
 my_start = my_ranges[my_ranges$rsid == my_rsid,]$start
 my_end= my_ranges[my_ranges$rsid == my_rsid,]$end
 #region <- GRanges(my_chrom, IRanges(start=my_start, end=my_end))
@@ -94,6 +95,7 @@ qtl_group == "Esophagus_Mucosa" | qtl_group == "Lung" | qtl_group ==  "Skin_Not_
 qtl_group == "Skin_Sun_Exposed_Lower_leg" | qtl_group == "Small_Intestine_Terminal_Ileum" |
 qtl_group == "Spleen" | qtl_group == "Whole_Blood"))
 
+
 #Merge the two tables
 tabix_paths_all <- bind_rows(tabix_paths, imported_tabix_paths)
 
@@ -115,7 +117,6 @@ column_names_gtex = colnames(read.delim("/mnt/storage/home/qh18484/scratch/GTEx_
 for (a in 1:nrow(tabix_paths_all)) {
  row <- tabix_paths_all[a,] 
  for (my_gene in my_ensembl_genes) {
-
 #summary_stats <- import_eQTLCatalogue(row$ftp_path, region, selected_gene_id = my_gene, column_names)
 if (row$study == "GTEx_V8") {
   summary_stats <- import_eQTLCatalogue_ver_tabix(row$ftp_path, coordinates, selected_gene_id = my_gene, column_names_gtex)

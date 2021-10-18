@@ -30,7 +30,12 @@ for (a in 1:nrow(merged_sun)) {
   
   #Get summary stats
   tryCatch({
+    open_gwas <- "/mnt/storage/home/qh18484/opengwas/public/"
+    gwas_input <- paste0(my_qtl_id, "/", my_qtl_id, ".vcf.gz")
+    all_qtls <-  query_gwas(qtl_full_path, chrompos=coordinates) 
+    write.delim(all_qtls, "all_qtls.txt", quote=F)
     summary_stats <- ieugwasr::associations(coordinates, my_gwas_id)
+    write.delim(summary_stats, "summary_stats.txt", quote=F)
     merged <- merge(summary_stats,my_eczema, by.x="rsid", by.y="RSID")
   },
   error = function(e) {

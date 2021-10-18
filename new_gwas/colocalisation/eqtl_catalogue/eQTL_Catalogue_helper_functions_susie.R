@@ -60,7 +60,7 @@ import_eQTLCatalogue_ver_tabix <- function(ftp_path, coordinates, selected_gene_
     dplyr::mutate_at(vars(chromosome, position, maf, pvalue, beta, se, ac, an), list(as.numeric)) %>%
     dplyr::group_by(id) %>% 
     dplyr::mutate(row_count = n()) %>% dplyr::ungroup() %>% 
-    dplyr::filter(row_count == 1)  #Multialllics
+    dplyr::filter(row_count == 1)  #Multiallelics
 #NA
   return(summary_stats)
 }
