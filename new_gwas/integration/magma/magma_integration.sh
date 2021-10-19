@@ -3,6 +3,7 @@ HOME=/mnt/storage/home/qh18484
 analysis=$HOME/scratch/new_gwas/integration/magma
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/magma
 master=$HOME/scratch/new_gwas/integration/1_loci_prep
+integration=$HOME/scratch/new_gwas/integration/final_integration
 
 gwas_name="eczema21_discovery"
 
@@ -12,3 +13,6 @@ cd $analysis
 Rscript --vanilla $scripts/magma_annotation.R $master/${gwas_name}_master.csv \
 $HOME/scratch/pops/${gwas_name}.genes.out \
 ${gwas_name}_magma.csv
+
+#Move final output file to the final integration folder.
+cp ${gwas_name}_magma.csv $integration

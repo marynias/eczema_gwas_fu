@@ -4,6 +4,7 @@ scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/dge/proteome
 old_scripts=$HOME/bin/eczema_gwas_fu/final_integration
 data_manipulation=$HOME/scratch/new_gwas/genome
 master=$HOME/scratch/new_gwas/integration/1_loci_prep
+integration=$HOME/scratch/new_gwas/integration/final_integration
 
 gwas_name="eczema21_discovery"
 
@@ -41,3 +42,5 @@ Rscript --vanilla $scripts/prepare_proteome_tables.R
 Rscript --vanilla $scripts/merge_proteome_tables.R  $master/${gwas_name}_master.csv \
 ${gwas_name}_dge_proteome.csv
 
+#Move final output file to the final integration folder.
+cp ${gwas_name}_dge_proteome.csv $integration

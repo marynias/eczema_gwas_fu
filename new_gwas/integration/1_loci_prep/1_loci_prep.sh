@@ -3,6 +3,7 @@ HOME=/mnt/storage/home/qh18484
 analysis=$HOME/scratch/new_gwas/integration/1_loci_prep
 input=$HOME/scratch/new_gwas/loci_definition
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/1_loci_prep
+gwas=$HOME/scratch/new_gwas/gwas/raw
 
 gwas_name="eczema21_discovery"
 

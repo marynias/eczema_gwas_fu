@@ -7,6 +7,7 @@ data_manipulation=$HOME/scratch/new_gwas/genome
 master=$HOME/scratch/new_gwas/integration/1_loci_prep
 pops=$HOME/scratch/pops/
 pops_analysis=$HOME/scratch/new_gwas/pops
+integration=$HOME/scratch/new_gwas/integration/final_integration
 
 gwas_name="eczema21_discovery"
 
@@ -21,3 +22,6 @@ python $old_scripts/sync_ids.py --tab $pops_analysis/${gwas_name}_pops_annotated
 Rscript --vanilla $scripts/pops_annotation.R $master/${gwas_name}_master.csv \
 ${gwas_name}_pops_annotated_syn.txt  \
 ${gwas_name}_pops.csv
+
+#Move final output file to the final integration folder.
+cp ${gwas_name}_pops.csv $integration

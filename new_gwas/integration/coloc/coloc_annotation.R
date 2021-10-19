@@ -21,7 +21,7 @@ coloc_gxp <- read.delim(my_significant_file, stringsAsFactors = F, header=T)
 
 #Filter by mininimum PPH4 = 80%.
 #Maximum PPH4 for transcripts at 0.61 at rs6419573 the IL18 locus so not worth running it in the future again.
-select <- coloc_gxp[coloc_gxp$PP.H4.abf > 0.8,]
+select <- coloc_gxp[coloc_gxp$PP.H4.abf > 0.95,]
 select$summary <- paste(select$tissue, " (", select$study, ")", sep="")
 #Prepare output for final merge.
 coloc_prioritized <- unique(data.frame(HGNC_symbol=select$hugo_name, coloc0=select$summary, rsid=select$rsid))#, Ensembl_gene_ID=select$ensembl_id))

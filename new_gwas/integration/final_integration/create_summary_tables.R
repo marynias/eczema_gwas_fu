@@ -1,11 +1,19 @@
 library("dplyr")
 library("stringr")
+library("tools")
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args) < 2) {
+  stop("At least 2 arguments must be supplied", call.=FALSE)}
+
+my_master_file <- args[1]
+gwas_name <- args[2]
 #Merge results tables to master table.
-my_master <- read.csv("paternoster2015_master.csv", stringsAsFactors = F, header=T)
+my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
 
 #Read in results tables and merge them
-temp = list.files(pattern="paternoster2015*")
-temp <- temp[!temp %in% c("paternoster2015_master.csv", "paternoster2015_vep.csv")]
+my_pattern <- paste0(gwas_name, "*.csv")
+temp = Sys.glob(my_pattern)
 
 my_cols = colnames(my_master)
 
@@ -18,6 +26,7 @@ for (my_table in temp) {
 
 #Convert all gaps to NA.
 my_master <- as_tibble(my_master) %>% mutate_all(list(~na_if(.,"")))
+
 number_of_datasources = dim(my_master)[2] - 5
 my_master$total_evidence_sources <- number_of_datasources - rowSums(is.na(my_master)) 
 
@@ -26,14 +35,15 @@ my_master$total_evidence_pieces <- my_master$total_evidence_sources + apply(my_m
 
 #Sort in descending order and save to file.
 my_master <- my_master[order(-my_master$total_evidence_sources, -my_master$total_evidence_pieces),]
-write.table(my_master, "final_summary_table.csv", quote=F, sep=",", row.names=F, na="")
+output_file <- paste("final_summary_table_", gwas_name, ".csv", sep="")
+write.table(my_master, output_file, quote=F, sep=",", row.names=F, na="")
 
 #Seperate out by rsid and save to file
 my_rsids <- unique(my_master$rsid)
 
 saveFile <- function(x) {
 my_temp_df <- my_master[my_master$rsid == x,]  
-my_temp_file <- paste(x, "_summary_table.csv", sep="")
+my_temp_file <- paste(x, "_", gwas_name, "_summary_table.csv", sep="")
 write.table(my_temp_df, my_temp_file, quote=F, sep=",", row.names=F, na="")  
 }
 
@@ -56,6 +66,9 @@ fig_score$MendelVar_skin_keywords <- ifelse(fig_score$MendelVar_skin_keywords  =
 fig_score$DEPICT_prioritization <- ifelse(fig_score$DEPICT_prioritization  == "yes", 1, 0)
 #Change MAGMA output to binary
 fig_score$MAGMA_prioritization <- ifelse(fig_score$MAGMA_prioritization  == "yes", 1, 0)
+fig_score$VEP_intron <- ifelse(fig_score$VEP_intron  == "yes", 1, 0)
+fig_score$VEP_missense <- ifelse(fig_score$VEP_missense  == "yes", 1, 0)
 #Replace all NA with 0
 fig_score[is.na(fig_score)] <- 0
-write.table(fig_score, "figure_summary_table.csv", quote=F, sep=",", row.names=F, na="")
+output_file2 <- paste("figure_summary_table_", gwas_name, ".csv", sep="")
+write.table(fig_score, output_file2, quote=F, sep=",", row.names=F, na="")

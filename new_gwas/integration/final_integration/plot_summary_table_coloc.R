@@ -1,16 +1,28 @@
 library(tools) 
 library("tidyverse")
 library(viridis)
-my_input <- read.delim("gxp_coloc_all_results.txt", header = TRUE, stringsAsFactors = FALSE)
+
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args) < 1) {
+  stop("At least 1 argument must be supplied", call.=FALSE)}
+
+coloc_results <- args[1]
+cyto_file <- args[2] 
+gwas_name <- args[3]
+
+coloc_t <- 0.95
+
+my_input <- read.delim(coloc_results, header = TRUE, stringsAsFactors = FALSE)
 #Provide the original file with rsid to cytoband mapping
-my_cyto <- read.delim("../paternoster_2015_index_snps_cytoband.bed", stringsAsFactors = F, header=F)
+my_cyto <- read.delim(cyto_file, stringsAsFactors = F, header=F)
 my_cyto$cytoband <- paste(my_cyto$V1, my_cyto$V8, sep="")
 my_cyto = subset(my_cyto, select = -c(V1, V2, V3, V5, V6, V7, V8, V9))
 colnames(my_cyto)[1] <- "rsid"
 my_input <- merge(my_input, my_cyto, by="rsid")
 
 #Filter to keep only results above a certain H4 threshold#
-select <- my_input[my_input$PP.H4.abf > 0.8,]
+select <- my_input[my_input$PP.H4.abf > coloc_t,]
 select <- select[gtools::mixedorder(select$cytoband), ]
 select$id <- paste(select$cytoband, " / ", select$rsid,  " / ", select$hugo_name)
 #Create labels for conditions
@@ -75,8 +87,9 @@ legend.key.size=unit(15, "pt"),
 #axis.line.y = element_line(color="black", size = 0.2),
 panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
 labs(color="PPH4")+ 
-scale_color_viridis(option = "D", limits=c(0.8,1))
-ggsave("coloc_blood_all.pdf", blood_all, dpi=300, height=7, width=6, units="in")
+scale_color_viridis(option = "D", limits=c(coloc_t, 1))
+figure_output0 <- paste("coloc_blood_all_", gwas_name, ".pdf", sep="")
+ggsave(figure_output0, blood_all, dpi=300, height=25, width=6, units="in")
 
 #Skin
 skin_all <- ggplot(select_skin, aes(x=detailed, y=fct_rev(as_factor(id)), color=PP.H4.abf)) +
@@ -87,8 +100,10 @@ angle = 90, hjust = 0), legend.title=element_text(size = 10), legend.text=elemen
 legend.key.size=unit(15, "pt"), 
 panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
 labs(color="PPH4")+ 
-scale_color_viridis(option = "D", limits=c(0.8,1))
-ggsave("coloc_skin_all.pdf", skin_all, dpi=300, height=7, width=6, units="in")
+scale_color_viridis(option = "D", limits=c(coloc_t, 1))
+
+figure_output <- paste("coloc_skin_all_", gwas_name, ".pdf", sep="")
+ggsave(figure_output, skin_all, dpi=300, height=30, width=6, units="in")
 
 ##Immune cell types
 immune_all <- ggplot(select_immune, aes(x=detailed, y=fct_rev(as_factor(id)), color=PP.H4.abf)) +
@@ -99,8 +114,9 @@ angle = 90, hjust = 0), legend.title=element_text(size = 10), legend.text=elemen
 legend.key.size=unit(15, "pt"), 
 panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
 labs(color="PPH4")+ 
-scale_color_viridis(option = "D", limits=c(0.8,1))
-ggsave("coloc_immune_all.pdf", immune_all, dpi=300, height=7, width=6, units="in")
+scale_color_viridis(option = "D", limits=c(coloc_t, 1))
+figure_output2 <- paste("coloc_immune_all_", gwas_name, ".pdf", sep="")
+ggsave(figure_output2, immune_all, dpi=300, height=40, width=6, units="in")
 
 #Organs
 organs_all <- ggplot(select_organs, aes(x=detailed, y=fct_rev(as_factor(id)), color=PP.H4.abf)) +
@@ -111,5 +127,6 @@ angle = 90, hjust = 0), legend.title=element_text(size = 10), legend.text=elemen
 legend.key.size=unit(15, "pt"), 
 panel.border = element_rect(colour = "black", fill=NA, size=0.5)) +
 labs(color="PPH4")+ 
-scale_color_viridis(option = "D", limits=c(0.8,1))
-ggsave("coloc_organs_all.pdf", organs_all, dpi=300, height=7, width=6, units="in")
+scale_color_viridis(option = "D", limits=c(coloc_t, 1))
+figure_output3 <- paste("coloc_organs_all_", gwas_name, ".pdf", sep="")
+ggsave(figure_output3, organs_all, dpi=300, height=35, width=6, units="in")

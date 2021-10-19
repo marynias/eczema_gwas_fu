@@ -49,4 +49,4 @@ sbatch --export=ALL,my_interval=$loci/${gwas_name}_interval.bed,gene_list=$loci/
 
 #Merge all the results from different loci into one table for gxp and tx.
 #Remove empty files with no rows (just header) before join.
-Rscript --vanilla $scripts/join_all_tables.R
+Rscript --vanilla $scripts/join_all_tables.R $gwas_name

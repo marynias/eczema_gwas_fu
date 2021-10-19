@@ -1,19 +1,28 @@
 library("tidyverse")
 library("extrafont")
 library("cowplot")
-library("hrbrthemes")
+#library("hrbrthemes")
 library(scales)
 library("gtools")
+library("tools")
 font_import()
 loadfonts()
 
-my_input <- tbl_df(read.csv("figure_summary_table.csv", header = TRUE, stringsAsFactors = FALSE))
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args) < 1) {
+  stop("At least 1 argument must be supplied", call.=FALSE)}
+
+gwas_name <- args[1]
+
+input_file <- paste("figure_summary_table_", gwas_name, ".csv", sep="")
+my_input <- tbl_df(read.csv(input_file, header = TRUE, stringsAsFactors = FALSE))
 my_input <- my_input[gtools::mixedorder(my_input$cytoband), ]
 #Croup the variables into categories
 my_bubbles <- c("rsid", "cytoband", "HGNC_symbol", "open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank")
 my_heatmap <- c("rsid", "cytoband", "HGNC_symbol", "total_evidence_sources", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome")
-my_tick <- c("rsid", "cytoband", "HGNC_symbol", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP")
-my_all_ranked <- c("rsid", "cytoband", "HGNC_symbol",  "open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP")
+my_tick <- c("rsid", "cytoband", "HGNC_symbol", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
+my_all_ranked <- c("rsid", "cytoband", "HGNC_symbol",  "open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
 my_input_bubbles <- my_input[,my_bubbles]
 my_input_heatmap <- my_input[,my_heatmap]
 my_input_tick <- my_input[,my_tick]
@@ -41,15 +50,16 @@ scale_x_discrete(breaks=c("total_evidence_sources", "total_evidence_pieces", "co
 labels=c("Total evidence sources", "Total evidence pieces", "coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
 scale_color_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
 scale_fill_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
-ggsave("heatmap_score_all.pdf", heatmap_all, dpi=300, height=7, width=6, units="in")
+figure_output <- paste("heatmap_score_all_", gwas_name, ".pdf", sep="")
+ggsave(figure_output, heatmap_all, dpi=300, height=15, width=6, units="in")
 
 
 #Bubble plot for ranks and binary
 #Dimensions 6 X 7 inches
 keycol <- "method" 
 valuecol <- "rank"
-gathercols <- c("open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP")
-non_ranked <- c( "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP")
+gathercols <- c("open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
+non_ranked <- c( "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
 ranked_long <- gather_(my_input_ranked, keycol, valuecol, gathercols)
 ranked_long$id <- paste(ranked_long$cytoband, " / ", ranked_long$rsid,  " / ", ranked_long$HGNC_symbol)
 ranked_long$id <- factor(ranked_long$id, levels = unique(ranked_long$id))
@@ -67,13 +77,13 @@ angle = 90, hjust = 0), legend.title=element_text(size = 10), legend.text=elemen
 legend.key.size=unit(15, "pt"), axis.ticks=element_blank()) + 
 scale_shape_manual(values=c(18, 16)) +
 scale_color_manual(values=c("lightskyblue", "black")) +
-scale_x_discrete(breaks=c("open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP"), 
-labels=c("Open Targets", "PoPs", "POSTGAP", "DEPICT", "MAGMA", "MendelVar enrichment", "MendelVar skin", "VEP"), 
+scale_x_discrete(breaks=c("open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense"), 
+labels=c("Open Targets", "PoPs", "POSTGAP", "DEPICT", "MAGMA", "MendelVar enrichment", "MendelVar skin", "VEP intron", "VEP missense"), 
 position = "top")  +
 scale_size(range = c(4, 2), breaks=c(1, 2, 3), name="Rank") +
 guides(shape=FALSE, color=FALSE) 
-ggsave("bubble_plot.pdf", bubble, dpi=300, height=7, width=6, units="in")
-
+figure_output2 <- paste("bubble_plot_", gwas_name, ".pdf", sep="")
+ggsave(figure_output2, bubble, dpi=300, height=15, width=6, units="in")
 
 #Barchart for score and number of evidence
 #Output 8 x 7 inches
@@ -91,7 +101,8 @@ panel.background = element_blank(), axis.title=element_blank(), legend.position 
 axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
 scale_y_continuous( breaks=pretty_breaks(n=6)) + 
 scale_x_discrete(limits = rev(levels(id)))
-ggsave("barchart_score.pdf", barchart_all, dpi=300, height=7, width=8, units="in")
+figure_output3 <- paste("barchart_score_", gwas_name, ".pdf", sep="")
+ggsave(figure_output3, barchart_all, dpi=300, height=15, width=8, units="in")
 
 ##Heatmap without evidence score - expression-based resources
 heatmap_short <- heatmap_long %>% filter(!(method %in% c("total_evidence_sources", "total_evidence_pieces")))
@@ -106,6 +117,7 @@ scale_x_discrete(breaks=c("coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteom
 labels=c("coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
 scale_color_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
 scale_fill_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
-ggsave("heatmap_score_select.pdf", heatmap_select, dpi=300, height=7, width=6, units="in")
+figure_output5 <- paste("heatmap_score_select_", gwas_name, ".pdf", sep="")
+ggsave(figure_output5, heatmap_select, dpi=300, height=15, width=5, units="in")
 
 

@@ -6,6 +6,7 @@ old_scripts=$HOME/bin/eczema_gwas_fu/final_integration
 data_manipulation=$HOME/scratch/new_gwas/genome
 master=$HOME/scratch/new_gwas/integration/1_loci_prep
 depict=$HOME/scratch/depict/results
+integration=$HOME/scratch/new_gwas/integration/final_integration
 
 gwas_name="eczema21_discovery"
 
@@ -20,3 +21,5 @@ Rscript --vanilla $scripts/depict_annotation.r $master/${gwas_name}_master.csv \
 ${gwas_name}_geneprioritization_syn.txt \
 ${gwas_name}_depict.csv
 
+#Move final output file to the final integration folder.
+cp ${gwas_name}_depict.csv $integration

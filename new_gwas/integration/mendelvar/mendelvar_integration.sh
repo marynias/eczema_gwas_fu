@@ -3,6 +3,7 @@ HOME=/mnt/storage/home/qh18484
 analysis=$HOME/scratch/new_gwas/integration/mendelvar
 scripts=$HOME/bin/eczema_gwas_fu/new_gwas/integration/mendelvar
 master=$HOME/scratch/new_gwas/integration/1_loci_prep
+integration=$HOME/scratch/new_gwas/integration/final_integration
 
 gwas_name="eczema21_discovery"
 
@@ -27,4 +28,5 @@ Rscript --vanilla $scripts/mendelvar_annotation.R $master/${gwas_name}_master.cs
  ${gwas_name}_mendelvar_pathways_significant.csv \
  ${gwas_name}_mendelvar.csv
 
- 
+ #Move final output file to the final integration folder.
+cp ${gwas_name}_mendelvar.csv $integration
