@@ -9,7 +9,7 @@ cd $gwas
 gwas_name="eczema21_discovery"
 
 #Read the summary stats into R, rename columns so that consistent with Paternoster2015 files and output as TSV.
-input_stats=$gwas/Table_sumStats_7th_run.csv
+input_stats=$gwas/Table_sumStats_7th_run_updated_RSID.csv
 Rscript --vanilla $scripts/prepare_summary_stats.R $input_stats $gwas_name
 
 #Filter out variants with no rsid for FUMA

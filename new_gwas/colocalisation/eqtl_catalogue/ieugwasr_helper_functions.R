@@ -1,25 +1,38 @@
 #SNPs identified by their RSIDs here.
 run_coloc <- function(merged){
-  eQTL_dataset = list(beta = merged$ES,
-                      varbeta = merged$SE_qtl^2,
-                      N = merged$SS, # Samples size is allele number (AN) dvided by 2
-                      MAF = merged$MAF, 
-                      type = "quant", 
-                      snp = merged$ID)
-  gwas_dataset = list(beta = merged$BETA,
-                      varbeta = merged$SE^2, 
-                      type = "cc", 
-                      snp = merged$ID,
-                      MAF = merged$MAF, 
-                      N = merged$N,
-                      s=0.2245)
-  #Recommended prior values. P12 is a good choice as only testing relevant tissues shown to be enriched.
-  coloc_res = coloc::coloc.abf(dataset1 = eQTL_dataset, dataset2 = gwas_dataset,p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
-  res_formatted = dplyr::as_tibble(t(as.data.frame(coloc_res$summary)))
-  return(res_formatted)
+  tryCatch({
+    eQTL_dataset = list(beta = merged$ES,
+                        varbeta = merged$SE_qtl^2,
+                        N = merged$SS, # Samples size is allele number (AN) dvided by 2
+                        MAF = merged$MAF, 
+                        type = "quant", 
+                        snp = merged$ID)
+    gwas_dataset = list(beta = merged$BETA,
+                        varbeta = merged$SE^2, 
+                        type = "cc", 
+                        snp = merged$ID,
+                        MAF = merged$MAF, 
+                        N = merged$N,
+                        s=0.2245)
+    #Recommended prior values. P12 is a good choice as only testing relevant tissues shown to be enriched.
+    print("OK1")
+    coloc_res = coloc::coloc.abf(dataset1 = eQTL_dataset, dataset2 = gwas_dataset,p1 = 1e-4, p2 = 1e-4, p12 = 1e-5)
+     },
+  error = function(e) {
+    print("OK2")
+    results <- rep(NA, 6)
+    coloc_res <- rbind(coloc_res, results)
+    colnames(coloc_res) <- c("nsnps", "PP.H0.abf", "PP.H1.abf", "PP.H2.abf", "PP.H3.abf", "PP.H4.abf")
+    rownames(coloc_res) <- NULL
+    return(coloc_res)
+     })
+    if (! is.null(coloc_res)) {
+      res_formatted = dplyr::as_tibble(t(as.data.frame(coloc_res$summary)))
+      return(res_formatted)
+    }
 }
 
-process_coloc <- function(merged_sun, my_eczema, my_study, my_feature, coordinates, gwas_name) {
+process_coloc <- function(merged_sun, my_eczema, my_study, my_feature, coordinates, gwas_name, my_rsid) {
 for (a in 1:nrow(merged_sun)) {
   row <- merged_sun[a,] 
   my_gwas_id <- row$id
@@ -46,10 +59,13 @@ for (a in 1:nrow(merged_sun)) {
   
   #Run coloc
   tryCatch({
+    print(my_rsid)
+    coloc_res <- NULL
     coloc_res <- run_coloc(merged)
-    coloc_res <- coloc_res %>% tibble::add_column("hugo_name" = my_hugo_name, "ensembl_id" = my_gene, "rsid" = my_rsid,
+    if (! is.null(coloc_res))
+    {coloc_res <- coloc_res %>% tibble::add_column("hugo_name" = my_hugo_name, "ensembl_id" = my_gene, "rsid" = my_rsid,
                                                   "study" = my_study, "tissue" = my_tissue, 
-                                                  "condition" = my_condition, "feature" = my_feature)
+                                                  "condition" = my_condition, "feature" = my_feature)}
     
   },
   error = function(e) {
@@ -60,7 +76,9 @@ for (a in 1:nrow(merged_sun)) {
   
 
   #Add to the data frame with all results
-  coloc_all <- bind_rows(coloc_all, coloc_res)
+ if (! is.null(coloc_res)) {
+   coloc_all <- bind_rows(coloc_all, coloc_res)
+ }
   
   #Save df to file
   output_file <- paste(my_rsid, "_", gwas_name, "_", my_study, "_ieu_coloc.txt", sep="")

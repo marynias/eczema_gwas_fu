@@ -111,7 +111,7 @@ merged_sun = merged_sun_0[merged_sun_0$rsid == my_rsid,]
 merged_eqtlgen = merged_eqtlgen_0[merged_eqtlgen_0$rsid == my_rsid,]
 
 if (dim(merged_sun)[1] > 0) {
-process_coloc(merged_sun, my_eczema, "Sun2018", "protein", coordinates, gwas_name)}
+process_coloc(merged_sun, my_eczema, "Sun2018", "protein", coordinates, gwas_name, my_rsid)}
 if (dim(merged_eqtlgen)[1] > 0) {
-process_coloc(merged_eqtlgen, my_eczema, "eQTLgen", "ge", coordinates, gwas_name)}
+process_coloc(merged_eqtlgen, my_eczema, "eQTLgen", "ge", coordinates, gwas_name, my_rsid)}
 }

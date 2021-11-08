@@ -11,7 +11,7 @@ gwas_name <- args[1]
 
 #Gene expression
 my_pattern <- paste0("*", gwas_name, "*_coloc.txt")
-temp = list.files(pattern=my_pattern)
+temp = Sys.glob(my_pattern)
 my_files = lapply(temp, read.delim)
 final_df = do.call(rbind, my_files)
 output_file <- paste(gwas_name, "_all_coloc.txt", sep="")

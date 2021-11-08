@@ -10,7 +10,7 @@ Run order of individual analyses:
 6) garfield/1_garfield_analysis.sh
 7) pops/1_pops_analysis.sh
 8) depict/1_depict_analysis.sh
-9) coloc/
+9) coloc/eqtl_catalogue_colocalisation.sh
 10) snpsea/01_snpsea_analysis.sh
 
 Run independently in web browser:
