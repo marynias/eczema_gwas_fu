@@ -12,7 +12,10 @@ gwas_name="eczema21_discovery"
 #Integrate all individual results tables. At the end may want to split the table by rsid or locus.
 #Check that all the tables have the same number of rows and then join by rsid,gene name,cytoband etc.
 
-Rscript --vanilla $scripts/create_summary_tables.R $master/${gwas_name}_master.csv $gwas_name
+Rscript --vanilla $scripts/create_summary_tables.R $master/${gwas_name}_master.csv \
+$gwas/Table_signHits_7th_500kb_run_updated_RSID.csv \
+$gwas_name 
+
 
 ##Plot the overall results
 Rscript --vanilla $scripts/plot_summary_table_ranking.R $gwas_name

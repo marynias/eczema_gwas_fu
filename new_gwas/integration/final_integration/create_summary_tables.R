@@ -3,19 +3,28 @@ library("stringr")
 library("tools")
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 2) {
-  stop("At least 2 arguments must be supplied", call.=FALSE)}
+if (length(args) < 3) {
+  stop("At least 3 arguments must be supplied", call.=FALSE)}
 
 my_master_file <- args[1]
-gwas_name <- args[2]
+lead_SNP_tab <- args[2]
+gwas_name <- args[3]
+
 #Merge results tables to master table.
 my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
+
+#Read in results from lead SNP table. Use to merge to give GRCh37 variant locations.
+lead_SNP_table <- read.delim(lead_SNP_tab, stringsAsFactors = F, header=T, sep=",")
+
+my_master <- merge(my_master, lead_SNP_table[c("RSID", "CHR", "POS")], by.x="rsid", by.y="RSID")
+
+my_master <- my_master %>% dplyr::select(rsid, cytoband, CHR, POS, Ensembl_gene_ID, HGNC_ID, HGNC_symbol)
 
 #Read in results tables and merge them
 my_pattern <- paste0(gwas_name, "*.csv")
 temp = Sys.glob(my_pattern)
 
-my_cols = colnames(my_master)
+my_cols = c("rsid", "cytoband", "Ensembl_gene_ID", "HGNC_ID", "HGNC_symbol")
 
 for (my_table in temp) {
   my_table_read <- read.csv(my_table, stringsAsFactors = F, header=T)
@@ -27,7 +36,7 @@ for (my_table in temp) {
 #Convert all gaps to NA.
 my_master <- as_tibble(my_master) %>% mutate_all(list(~na_if(.,"")))
 
-number_of_datasources = dim(my_master)[2] - 5
+number_of_datasources = dim(my_master)[2] - 7
 my_master$total_evidence_sources <- number_of_datasources - rowSums(is.na(my_master)) 
 
 #Counting number of multiple entries per cell (seperated with ";")
