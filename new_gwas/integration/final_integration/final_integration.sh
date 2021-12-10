@@ -23,3 +23,12 @@ Rscript --vanilla $scripts/plot_summary_table_ranking.R $gwas_name
 ##Plot colocalisation results.
 Rscript --vanilla $scripts/plot_summary_table_coloc.R $coloc/${gwas_name}_all_coloc.txt \
 $gwas/leadSNPs.${gwas_name}_cytoBand.bed $gwas_name
+
+#Plots using manually chosen top 1 gene at a locus in case of ties.
+Rscript --vanilla $scripts/create_summary_tables_chosenhits.R $master/${gwas_name}_master.csv \
+$gwas/Table_signHits_7th_500kb_run_updated_RSID.csv \
+$gwas_name ${gwas_name}_top_genes.txt 
+
+##Plot the overall results
+Rscript --vanilla $scripts/plot_summary_table_ranking_chosenhits.R $gwas_name
+
