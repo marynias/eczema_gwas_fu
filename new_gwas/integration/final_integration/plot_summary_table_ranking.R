@@ -20,7 +20,7 @@ my_input <- tbl_df(read.csv(input_file, header = TRUE, stringsAsFactors = FALSE)
 my_input <- my_input[gtools::mixedorder(my_input$cytoband), ]
 #Croup the variables into categories
 my_bubbles <- c("rsid", "cytoband", "HGNC_symbol", "CHR", "POS","open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank")
-my_heatmap <- c("rsid", "cytoband", "HGNC_symbol", "CHR", "POS", "total_evidence_sources", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome")
+my_heatmap <- c("rsid", "cytoband", "HGNC_symbol", "CHR", "POS", "total_evidence_types", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome")
 my_tick <- c("rsid", "cytoband", "HGNC_symbol", "CHR", "POS", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
 my_all_ranked <- c("rsid", "cytoband", "HGNC_symbol", "CHR", "POS", "open_targets_prioritization_rank", "pops_prioritization_rank", "POSTGAP_prioritization_rank", "DEPICT_prioritization", "MAGMA_prioritization", "MendelVar_sig_enrichment", "MendelVar_skin_keywords", "VEP_intron", "VEP_missense")
 my_input_bubbles <- my_input[,my_bubbles]
@@ -30,7 +30,7 @@ my_input_ranked <- my_input[,my_all_ranked]
 
 keycol <- "method" 
 valuecol <- "count"
-gathercols <- c("total_evidence_sources", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome")
+gathercols <- c("total_evidence_types", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome")
 heatmap_long <- gather_(my_input_heatmap, keycol, valuecol, gathercols)
 heatmap_long$id <- paste(heatmap_long$cytoband, " / ", heatmap_long$rsid,  " / ", heatmap_long$HGNC_symbol)
 #Sort by chromosomal position
@@ -40,7 +40,7 @@ heatmap_long$method <- factor(heatmap_long$method, levels=unique(heatmap_long$me
 heatmap_long$count_no_0 <- gsub("\\<0\\>", "", heatmap_long$count)
 
 #Dimensions 6 X 7 inches.
-#Heatmap with expression resources containing also the total scores.
+#Heatmap with expression retypes containing also the total scores.
 heatmap_all <- ggplot(heatmap_long, aes(method, fct_rev(as_factor(id)), col = count, fill = count, label=count_no_0)) +
   geom_tile(color = "gray") +
   geom_text(col = "white", size = 2) +
@@ -48,8 +48,8 @@ heatmap_all <- ggplot(heatmap_long, aes(method, fct_rev(as_factor(id)), col = co
                           panel.background = element_blank(), axis.title=element_blank(), axis.text.x=element_text(colour="maroon", angle = 90, 
                                                                                                                    hjust = 0), legend.title=element_text(size = 10), legend.text=element_text(size=8), legend.key.size=unit(15, "pt"),
                           axis.ticks=element_blank()) +  
-  scale_x_discrete(breaks=c("total_evidence_sources", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome"), 
-                   labels=c("Total evidence sources", "Total evidence pieces", "coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
+  scale_x_discrete(breaks=c("total_evidence_types", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome"), 
+                   labels=c("Total evidence types", "Total evidence pieces", "coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
   scale_color_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
   scale_fill_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
 figure_output <- paste("heatmap_score_all_", gwas_name, ".pdf", sep="")
@@ -91,8 +91,8 @@ ggsave(figure_output2, bubble, dpi=300, height=15, width=6, units="in")
 
 #Barchart for score and number of evidence
 #Output 8 x 7 inches
-barchart_in <- heatmap_long[heatmap_long$method %in% c("total_evidence_sources", "total_evidence_pieces"), ]
-barchart_in$method <-gsub("total_evidence_sources", "Total evidence sources", barchart_in$method )
+barchart_in <- heatmap_long[heatmap_long$method %in% c("total_evidence_types", "total_evidence_pieces"), ]
+barchart_in$method <-gsub("total_evidence_types", "Total evidence types", barchart_in$method )
 barchart_in$method <-gsub("total_evidence_pieces", "Total evidence pieces", barchart_in$method )
 #barchart_in <- barchart_in %>% map_df(rev)
 
@@ -108,8 +108,8 @@ barchart_all <- ggplot(barchart_in, aes(x = reorder(id, desc(id)), y = count)) +
 figure_output3 <- paste("barchart_score_", gwas_name, ".pdf", sep="")
 ggsave(figure_output3, barchart_all, dpi=300, height=15, width=8, units="in")
 
-##Heatmap without evidence score - expression-based resources
-heatmap_short <- heatmap_long %>% filter(!(method %in% c("total_evidence_sources", "total_evidence_pieces")))
+##Heatmap without evidence score - expression-based retypes
+heatmap_short <- heatmap_long %>% filter(!(method %in% c("total_evidence_types", "total_evidence_pieces")))
 heatmap_select <- ggplot(heatmap_short, aes(method, fct_rev(as_factor(id)), col = count, fill = count, label=count_no_0)) +
   geom_tile(color = "gray") +
   geom_text(col = "white", size = 2) +

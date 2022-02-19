@@ -12,6 +12,7 @@ cd $analysis
 
 #Annotate the master file.
 Rscript --vanilla $scripts/smultixcan_annotation.R $master/${gwas_name}_master.csv \
+shared_tissue_studies.csv \
 ${gwas_name}_smultixcan.csv
 
 #Move final output file to the final integration folder.

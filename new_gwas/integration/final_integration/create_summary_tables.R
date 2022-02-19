@@ -36,14 +36,29 @@ for (my_table in temp) {
 #Convert all gaps to NA.
 my_master <- as_tibble(my_master) %>% mutate_all(list(~na_if(.,"")))
 
-number_of_datasources = dim(my_master)[2] - 7
-my_master$total_evidence_sources <- number_of_datasources - rowSums(is.na(my_master)) 
+number_of_datatypes = dim(my_master)[2] - 7
+my_master$total_evidence_types <- number_of_datatypes - rowSums(is.na(my_master)) 
+
+#Total evidence pieces without xQTL colocalisation-like evidence.
+my_master_subset <- my_master %>% select(-smr, -coloc, -smultixcan)
+#temprorary total evidence pieces (without coloc methods)
+my_master$total_evidence_pieces <- number_of_datatypes - 3 - rowSums(is.na(my_master_subset)) 
+my_master$total_evidence_pieces <-  my_master$total_evidence_pieces + apply(my_master_subset,1, function(x)sum(str_count(x, ";"), na.rm=T))
 
 #Counting number of multiple entries per cell (seperated with ";")
-my_master$total_evidence_pieces <- my_master$total_evidence_sources + apply(my_master,1, function(x)sum(str_count(x, ";"), na.rm=T))
+my_master$coloc_list <- strsplit(my_master$coloc, ";")
+my_master$smr_list <- strsplit(my_master$smr, ";")
+my_master$smultixcan_list <- strsplit(my_master$smultixcan, ";")
 
+for (a in 1:nrow(my_master)) {
+  listoflists <- c(my_master$coloc_list[a], my_master$smr_list[a], my_master$smultixcan_list[a])
+  temp <- do.call(c, listoflists)
+  my_master$total_evidence_pieces[a] <- my_master$total_evidence_pieces[a] + length(unique(na.omit(temp)))
+}
+#Drop unncessary columns
+my_master <- my_master %>% select(-coloc_list, -smr_list, -smultixcan_list)
 #Sort in descending order and save to file.
-my_master <- my_master[order(-my_master$total_evidence_sources, -my_master$total_evidence_pieces),]
+my_master <- my_master[order(-my_master$total_evidence_pieces, -my_master$total_evidence_types),]
 output_file <- paste("final_summary_table_", gwas_name, ".csv", sep="")
 write.table(my_master, output_file, quote=F, sep=",", row.names=F, na="")
 
@@ -58,10 +73,10 @@ write.table(my_temp_df, my_temp_file, quote=F, sep=",", row.names=F, na="")
 
 lapply(my_rsids, saveFile)
 
-#Create a table for graphical summary.
-fig_score <- my_master %>% group_by(rsid) %>% slice_max(order_by = total_evidence_sources, n = 1) %>% ungroup()
+#Create a table for graphical summary. Min. 3 evidence types
+fig_score <- my_master %>% filter(total_evidence_types > 2) %>% group_by(rsid) %>% slice_max(order_by = total_evidence_pieces, n = 1) %>% ungroup()
 #Now group by evidence pieces in case of ties
-fig_score <- fig_score %>% group_by(rsid) %>% slice_max(order_by = total_evidence_pieces, n = 1) %>% ungroup()
+fig_score <- fig_score %>% group_by(rsid) %>% slice_max(order_by = total_evidence_types, n = 1) %>% ungroup()
 #Prepare a table for output, which provides a count of entries in the coloc, SMR, Smultixcan, DGE proteome, DGE expression columns
 fig_score$coloc <- str_count(fig_score$coloc, "\\(")
 fig_score$smr <- ifelse(is.na(fig_score$smr), 0, 1+str_count(fig_score$smr, ";"))

@@ -4,13 +4,14 @@ library("tools")
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 3) {
-  stop("At least 3 arguments must be supplied", call.=FALSE)}
+if (length(args) < 4) {
+  stop("At least 4 arguments must be supplied", call.=FALSE)}
 
 
 my_master_file <- args[1]
 my_significant_file <- args[2]
-output <- args[3]
+shared_tissue <- args[3]
+output <- args[4]
 
 #My annotation master table
 my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
@@ -19,10 +20,20 @@ my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
 #Read in coloc result file for genes.
 coloc_gxp <- read.delim(my_significant_file, stringsAsFactors = F, header=T)
 
-#Filter by mininimum PPH4 = 80%.
+#Dictionary aiming to standardise GTEx tissue names across coloc, SMR, and smultiXcan
+shared_tiss <- read.csv(shared_tissue, stringsAsFactors = F, header=T, na.string = "")
+
+#Subset to tissues shared across coloc and SMR dataset.
+shared_tiss <- shared_tiss %>% select(coloc, smr) %>% na.omit()
+
+coloc_tissues <- shared_tiss$coloc
+smr_tissues <- shared_tiss$smr
+names(coloc_tissues) <- smr_tissues
+#Filter by mininimum PPH4 = 95%.
 #Maximum PPH4 for transcripts at 0.61 at rs6419573 the IL18 locus so not worth running it in the future again.
-select <- coloc_gxp[coloc_gxp$PP.H4.abf > 0.95,]
+select <- coloc_gxp %>% filter(PP.H4.abf > 0.95)
 select$summary <- paste(select$tissue, " (", select$study, ")", sep="")
+select$summary[select$summary %in% coloc_tissues] <- names(coloc_tissues)[match(select$summary[select$summary %in% coloc_tissues], coloc_tissues)]
 #Prepare output for final merge.
 coloc_prioritized <- unique(data.frame(HGNC_symbol=select$hugo_name, coloc0=select$summary, rsid=select$rsid))#, Ensembl_gene_ID=select$ensembl_id))
 coloc_prioritized <- unique(coloc_prioritized)

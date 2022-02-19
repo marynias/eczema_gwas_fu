@@ -7,11 +7,21 @@ if (length(args) < 2) {
   stop("At least 2 arguments must be supplied", call.=FALSE)}
 
 my_master_file <- args[1]
-output <- args[2]
+shared_tissue <- args[2]
+output <- args[3]
 #Read in all the results files for individual tissues
 temp = list.files(pattern="Pheno*", recursive = F)
 #My annotation master table
 my_master <- read.csv(my_master_file, stringsAsFactors = F, header=T)
+
+#Dictionary aiming to standardise GTEx tissue names across coloc, SMR, and smultiXcan
+shared_tiss <- read.csv(shared_tissue, stringsAsFactors = F, header=T, na.string = "")
+
+#Subset to tissues shared across SMultiXcan and SMR dataset.
+shared_tiss <- shared_tiss %>% select(smultixcan, smr) %>% na.omit()
+smultixcan_tissues <- shared_tiss$smultixcan
+smr_tissues <- shared_tiss$smr
+names(smultixcan_tissues) <- smr_tissues
 
 loadFile <- function(x) {
   all_x <- str_replace(x, "Pheno__", "")
@@ -31,6 +41,8 @@ final_df = as_tibble(do.call(rbind, all_normal))
 #Filter with p-values below the Bonferroni-adjusted alpha thershold.
 print(colnames(final_df))
 final_df <- final_df %>% filter(pvalue < alpha)
+
+final_df$tissue[final_df$tissue %in% smultixcan_tissues] <- names(smultixcan_tissues)[match(final_df$tissue[final_df$tissue %in% smultixcan_tissues], smultixcan_tissues)]
 #Prepare output for final merge.
 smultixcan_prioritized <- unique(data.frame(HGNC_symbol=final_df$gene_name, smultixcan_0=final_df$tissue, Ensembl_gene_ID=final_df$gene))
 #Make sure to group all tissues for the gene under one entry

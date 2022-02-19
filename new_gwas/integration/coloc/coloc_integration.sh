@@ -13,6 +13,7 @@ cd $analysis
 #Annotate the master file.
 Rscript --vanilla $scripts/coloc_annotation.R $master/${gwas_name}_master.csv \
 $coloc/${gwas_name}_all_coloc.txt \
+shared_tissue_studies.csv \
 ${gwas_name}_coloc.csv
 
 #Move final output file to the final integration folder.
