@@ -16,7 +16,7 @@ $gwas/Table_signHits_7th_500kb_run_updated_RSID.csv \
 $gwas_name 
 
 ##Plot the overall results
-Rscript --vanilla $scripts/plot_summary_table_ranking.R $gwas_name
+Rscript --vanilla $scripts/plot_summary_table_ranking.R $gwas_name snp_known_novel.txt
 
 ##Plot colocalisation results.
 Rscript --vanilla $scripts/plot_summary_table_coloc.R $coloc/${gwas_name}_all_coloc.txt \

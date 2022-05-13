@@ -10,10 +10,15 @@ loadfonts()
 
 args = commandArgs(trailingOnly=TRUE)
 
-if (length(args) < 1) {
-  stop("At least 1 argument must be supplied", call.=FALSE)}
+if (length(args) < 2) {
+  stop("At least 2 arguments must be supplied", call.=FALSE)}
 
 gwas_name <- args[1]
+#File classifying SNPs as known and novel
+known_novel <- args[2]
+known_novel_df <- read.delim(known_novel, stringsAsFactors=F)
+known_loci <- known_novel_df[known_novel_df$Known...Novel=="Known",]
+novel_loci <- known_novel_df[known_novel_df$Known...Novel=="Novel",]
 
 input_file <- paste("figure_summary_table_", gwas_name, ".csv", sep="")
 my_input <- tbl_df(read.csv(input_file, header = TRUE, stringsAsFactors = FALSE))
@@ -49,7 +54,7 @@ heatmap_all <- ggplot(heatmap_long, aes(method, fct_rev(as_factor(id)), col = co
                                                                                                                    hjust = 0), legend.title=element_text(size = 10), legend.text=element_text(size=8), legend.key.size=unit(15, "pt"),
                           axis.ticks=element_blank()) +  
   scale_x_discrete(breaks=c("total_evidence_types", "total_evidence_pieces", "coloc", "smultixcan",  "smr", "dge_gxp", "dge_proteome"), 
-                   labels=c("Total evidence types", "Total evidence pieces", "coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
+                   labels=c("Evidence types", "Total evidence score", "coloc", "SMultiXcan",  "SMR", "transcriptome", "proteome"), position = "top") +
   scale_color_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1))))) +
   scale_fill_viridis_c(option = "turbo", na.value="white", breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
 figure_output <- paste("heatmap_score_all_", gwas_name, ".pdf", sep="")
@@ -92,8 +97,8 @@ ggsave(figure_output2, bubble, dpi=300, height=15, width=6, units="in")
 #Barchart for score and number of evidence
 #Output 8 x 7 inches
 barchart_in <- heatmap_long[heatmap_long$method %in% c("total_evidence_types", "total_evidence_pieces"), ]
-barchart_in$method <-gsub("total_evidence_types", "Total evidence types", barchart_in$method )
-barchart_in$method <-gsub("total_evidence_pieces", "Total evidence pieces", barchart_in$method )
+barchart_in$method <-gsub("total_evidence_types", "Evidence types", barchart_in$method )
+barchart_in$method <-gsub("total_evidence_pieces", "Total evidence score", barchart_in$method )
 #barchart_in <- barchart_in %>% map_df(rev)
 
 barchart_all <- ggplot(barchart_in, aes(x = reorder(id, desc(id)), y = count)) +
@@ -107,6 +112,26 @@ barchart_all <- ggplot(barchart_in, aes(x = reorder(id, desc(id)), y = count)) +
   scale_x_discrete(limits = rev(levels(id)))
 figure_output3 <- paste("barchart_score_", gwas_name, ".pdf", sep="")
 ggsave(figure_output3, barchart_all, dpi=300, height=15, width=8, units="in")
+
+#Subset the barchart to known and novel loci
+barchart_known <- barchart_in[barchart_in$rsid %in% known_loci$RSID,]
+barchart_novel <- barchart_in[barchart_in$rsid %in% novel_loci$RSID,]
+#Plot Known and novel loci seperately. Plot total evidence score and type seperately too.
+barchart_known_score <- barchart_known[barchart_known$method == "Total evidence score",]
+barchart_known_type <- barchart_known[barchart_known$method == "Evidence types",]
+barchart_novel_score <- barchart_novel[barchart_novel$method == "Total evidence score",]
+barchart_novel_type <- barchart_novel[barchart_novel$method == "Evidence types",]
+
+barchart_known_score_fig <- ggplot(barchart_known_score, aes(x = reorder(id, desc(id)), y = count)) +
+  geom_col(aes(fill = "peru")) + 
+  coord_flip() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title=element_blank(), legend.position = "none", 
+        axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
+  scale_y_continuous( breaks=pretty_breaks(n=6)) + 
+  scale_x_discrete(limits = rev(levels(id)))
+figure_output3 <- paste("barchart_score_known_", gwas_name, ".pdf", sep="")
+ggsave(figure_output3, barchart_known_score_fig, dpi=300, height=12, width=8, units="in")
 
 ##Heatmap without evidence score - expression-based retypes
 heatmap_short <- heatmap_long %>% filter(!(method %in% c("total_evidence_types", "total_evidence_pieces")))
