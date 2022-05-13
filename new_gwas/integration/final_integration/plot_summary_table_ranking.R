@@ -13,9 +13,11 @@ args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 2) {
   stop("At least 2 arguments must be supplied", call.=FALSE)}
 
-gwas_name <- args[1]
+#gwas_name <- args[1]
+gwas_name <- "eczema21_discovery"
 #File classifying SNPs as known and novel
-known_novel <- args[2]
+#known_novel <- args[2]
+known_novel <- "snp_known_novel.txt"
 known_novel_df <- read.delim(known_novel, stringsAsFactors=F)
 known_loci <- known_novel_df[known_novel_df$Known...Novel=="Known",]
 novel_loci <- known_novel_df[known_novel_df$Known...Novel=="Novel",]
@@ -122,16 +124,54 @@ barchart_known_type <- barchart_known[barchart_known$method == "Evidence types",
 barchart_novel_score <- barchart_novel[barchart_novel$method == "Total evidence score",]
 barchart_novel_type <- barchart_novel[barchart_novel$method == "Evidence types",]
 
+#Total evidence score - known
 barchart_known_score_fig <- ggplot(barchart_known_score, aes(x = reorder(id, desc(id)), y = count)) +
-  geom_col(aes(fill = "peru")) + 
+  geom_col(fill = "#FF6666", color = "black", size = 0.1) + 
   coord_flip() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.title=element_blank(), legend.position = "none", 
         axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
   scale_y_continuous( breaks=pretty_breaks(n=6)) + 
-  scale_x_discrete(limits = rev(levels(id)))
+  scale_x_discrete(limits = rev(levels(id))) 
 figure_output3 <- paste("barchart_score_known_", gwas_name, ".pdf", sep="")
 ggsave(figure_output3, barchart_known_score_fig, dpi=300, height=12, width=8, units="in")
+
+#Total evidence score - novel
+barchart_novel_score_fig <- ggplot(barchart_novel_score, aes(x = reorder(id, desc(id)), y = count)) +
+  geom_col(fill = "#FF6666", color = "black", size = 0.1) + 
+  coord_flip() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title=element_blank(), legend.position = "none", 
+        axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
+  scale_y_continuous( breaks=pretty_breaks(n=6)) + 
+  scale_x_discrete(limits = rev(levels(id))) 
+figure_output3b <- paste("barchart_score_novel_", gwas_name, ".pdf", sep="")
+ggsave(figure_output3b, barchart_novel_score_fig, dpi=300, height=8, width=6, units="in")
+
+#Evidence type - known
+barchart_known_type_fig <- ggplot(barchart_known_type, aes(x = reorder(id, desc(id)), y = count)) +
+  geom_col(fill = "#00BFC4", color = "black", size = 0.1) + 
+  coord_flip() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title=element_blank(), legend.position = "none", 
+        axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
+  scale_y_continuous( breaks=pretty_breaks(n=6)) + 
+  scale_x_discrete(limits = rev(levels(id))) 
+figure_output4 <- paste("barchart_type_known_", gwas_name, ".pdf", sep="")
+ggsave(figure_output4, barchart_known_type_fig, dpi=300, height=12, width=6, units="in")
+
+#Evidence type - novel
+barchart_novel_type_fig <- ggplot(barchart_novel_type, aes(x = reorder(id, desc(id)), y = count)) +
+  geom_col(fill = "#00BFC4", color = "black", size = 0.1) + 
+  coord_flip() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.title=element_blank(), legend.position = "none", 
+        axis.ticks.y = element_blank(), axis.line.x = element_line(color="black", size = 0.2)) + 
+  scale_y_continuous( breaks=pretty_breaks(n=6)) + 
+  scale_x_discrete(limits = rev(levels(id))) 
+figure_output4b <- paste("barchart_type_novel_", gwas_name, ".pdf", sep="")
+ggsave(figure_output4b, barchart_novel_type_fig, dpi=300, height=8, width=5, units="in")
+
 
 ##Heatmap without evidence score - expression-based retypes
 heatmap_short <- heatmap_long %>% filter(!(method %in% c("total_evidence_types", "total_evidence_pieces")))
